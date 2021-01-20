@@ -103,8 +103,14 @@ class TwoIP(object):
             else:
                 raise RuntimeError(f'API request did not provide any Content-Type header')
 
+        # Make sure the response can be parsed
+        try:
+            json = req.json()
+        except Exception as e:
+            raise RuntimeError('Exception parsing response from API as json') from e
+
         # Return content
-        return req.json()
+        return json
 
     def __api_param(self, params: dict) -> dict:
         """Add API key to the list of parameters for the API request.
