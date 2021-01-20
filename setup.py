@@ -30,7 +30,6 @@ setup(
     python_requires='>= 3.6',
     install_requires=requires,
     license=about['__license__'],
-    include_package_data=True,
     classifiers=[
         'Intended Audience :: Developers',
         'Natural Language :: English',
