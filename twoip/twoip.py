@@ -87,14 +87,13 @@ class TwoIP(object):
         except Exception as e:
             raise RuntimeError('API request failed') from e
 
+        # Make sure API request didn't result in rate limit
+        if req.status_code == 429:
+            raise RuntimeError(f'API has reached rate limit; retry in an hour or use an API key')
+
         # Make sure response code is fine
         if req.status_code != 200:
-            raise RuntimeError(f'Recieved unexpected response code "{req.status_code}" from API')
-
-        # Make sure API request didn't result in rate limit message
-        rate_limit_text = b'Limit of returned objects has been reached'
-        if rate_limit_text in req.content:
-            raise RuntimeError(f'API has reached daily rate limit')
+            raise RuntimeError(f'Received unexpected response code "{req.status_code}" from API')
 
         # Make sure content type is expected
         if req.headers.get('Content-Type') != 'application/json':
