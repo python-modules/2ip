@@ -47,3 +47,4 @@ Retrieve geographic information for the IP address `8.8.8.8`:
 - [ ] Support for hosting API
 - [ ] Option to retrieve data as XML
 - [ ] Unit tests
+- [ ] Deduplicate handler to retrieve information from API
