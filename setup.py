@@ -9,8 +9,8 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 # 'setup.py publish' shortcut.
 if sys.argv[-1] == 'publish':
-    os.system('python setup.py sdist bdist_wheel')
-    os.system('twine upload dist/*')
+    os.system('python3 setup.py sdist bdist_wheel')
+    os.system('python3 -m twine upload dist/*')
     sys.exit()
 
 about = {}
