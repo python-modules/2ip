@@ -4,7 +4,7 @@
 
 ## [Unreleased]
 
-- Use response code to check if the API has been rate limited
+- Use HTTP response code to check if the API has been rate limited
 - Update setup.py for packaging and testing purposes
 - Correct license
 
