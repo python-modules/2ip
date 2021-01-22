@@ -10,7 +10,38 @@ Install the module from PyPI:
 python3 -m pip install 2ip
 ```
 
+## Methods
+
+The following methods are available.
+### TwoIP (Initialisation)
+
+When initialising the 2ip module the following parameters may be specified:
+
+* *Optional* `key`: The API key to use for lookups. If no API key defined the API lookups will use the rate limited free API.
+
+### geo
+
+The geographic lookup method accepts the following parameters:
+
+* *Required* `ip`: The IP address to lookup.
+* *Optional* `format` {**json**,xml}: The output format for the request. `json` will return a dict and `xml` will return a string.
+* *Optional* `force` {True,**False**}: Force an API lookup even if there is a cache entry.
+* *Optional* `cache` {**True**,False}: Allow the lookup result to be cached.
+
+### provider
+
+The provider lookup method accepts the following parameters:
+
+* *Required* `ip`: The IP address to lookup.
+* *Optional* `format` {**json**,xml}: The output format for the request. `json` will return a dict and `xml` will return a string.
+* *Optional* `force` {True,**False**}: Force an API lookup even if there is a cache entry.
+* *Optional* `cache` {**True**,False}: Allow the lookup result to be cached.
+
 ## Examples
+
+Some example scripts are included in the [examples](examples/) directory.
+
+### Provider API
 
 Retrieve provider information for the IP address `192.0.2.0` as a `dict`:
 
@@ -35,6 +66,8 @@ Retrieve provider information for the IP address `192.0.2.0` as a XML string:
 >>> twoip.provider(ip = '192.0.2.0', format = 'xml')
 '<?xml version="1.0" encoding="UTF-8"?>\n<provider_api><ip>192.0.2.0</ip><name_ripe>Reserved AS</name_ripe><name_rus></name_rus><ip_range_start>3221225984</ip_range_start><ip_range_end>3221226239</ip_range_end><route>192.0.2.0</route><mask>24</mask></provider_api>'
 ```
+
+### Geographic API
 
 Retrieve geographic information for the IP address `8.8.8.8` as a `dict`:
 
@@ -73,4 +106,4 @@ Retrieve geographic information for the IP address `8.8.8.8` as a XML string:
 - [ ] Support for hosting API
 - [x] Option to retrieve data as XML
 - [ ] Unit tests
-- [ ] Deduplicate handler to retrieve information from API
+- [x] Deduplicate handler to retrieve information from API
