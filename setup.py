@@ -28,7 +28,7 @@ test_requirements = [
 ]
 
 setup(
-    name=about['__title__'],
+    name=f'{about["__title__"]}-{about["__username__"]}',
     version=about['__version__'],
     description=about['__description__'],
     long_description=readme,
