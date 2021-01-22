@@ -2,7 +2,7 @@
 
 2ip Python module changelog.
 
-## [Unreleased]
+## [0.0.2] - 2020-01-23
 
 - Use HTTP response code to check if the API has been rate limited
 - Update setup.py for packaging and testing purposes
