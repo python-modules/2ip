@@ -9,8 +9,8 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 # 'setup.py publish' shortcut.
 if sys.argv[-1] == 'publish':
-    os.system('python setup.py sdist bdist_wheel')
-    os.system('twine upload dist/*')
+    os.system('python3 setup.py sdist bdist_wheel')
+    os.system('python3 -m twine upload dist/*')
     sys.exit()
 
 about = {}
@@ -27,8 +27,14 @@ test_requirements = [
     'pytest'
 ]
 
+# If username is in the version file, append it to the package name
+if '__username__' in about:
+    name = f'{about["__title__"]}-{about["__username__"]}'
+else:
+    name = about['__title__']
+
 setup(
-    name=about['__title__'],
+    name=name,
     version=about['__version__'],
     description=about['__description__'],
     long_description=readme,
