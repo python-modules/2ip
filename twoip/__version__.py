@@ -1,5 +1,4 @@
 __title__ = '2ip'
-__username__ = 'gbe0'
 __description__ = '2ip.me API Client.'
 __url__ = 'https://github.com/python-modules/2ip'
 __version__ = '0.0.1'

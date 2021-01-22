@@ -27,8 +27,14 @@ test_requirements = [
     'pytest'
 ]
 
+# If username is in the version file, append it to the package name
+if about["__username__"]:
+    name = f'{about["__title__"]}-{about["__username__"]}'
+else:
+    name = about["__title__"]
+
 setup(
-    name=f'{about["__title__"]}-{about["__username__"]}',
+    name=name,
     version=about['__version__'],
     description=about['__description__'],
     long_description=readme,
