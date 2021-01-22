@@ -50,7 +50,6 @@ class TwoIP(object):
         self.__cache = {
             'geo': {},
             'provider': {},
-            'hosting': {},
         }
 
         # Debugging
