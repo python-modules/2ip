@@ -39,7 +39,7 @@ The provider lookup method accepts the following parameters:
 
 ## Examples
 
-Some example scripts are included in the [examples](examples/) directory.
+Some example scripts are included in the [examples](https://github.com/python-modules/2ip/tree/main/examples) directory.
 
 ### Provider API
 
