@@ -104,6 +104,6 @@ Retrieve geographic information for the IP address `8.8.8.8` as a XML string:
 - [ ] Support for email API
 - [ ] Support for MAC address API
 - [ ] Support for hosting API
-- [x] Option to retrieve data as XML
 - [ ] Unit tests
 - [x] Deduplicate handler to retrieve information from API
+- [x] Option to retrieve data as XML
