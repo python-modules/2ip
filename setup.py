@@ -58,4 +58,16 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
     ],
+    extras_require={
+        'cli': [
+            'click', 'prettytable',
+        ],
+        'color': [
+            'colorlog',
+        ],
+    },
+    entry_points='''
+        [console_scripts]
+        2ip=twoip:cli
+    ''',
 )
