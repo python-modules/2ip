@@ -1,1 +1,3 @@
-requests
+httpx[http2]
+click
+tabulate

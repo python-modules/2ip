@@ -1,5 +1,4 @@
-
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import sys
 from codecs import open
@@ -23,9 +22,7 @@ with open('README.md', 'r', 'utf-8') as f:
 with open('requirements.txt', 'r', 'utf-8') as f:
     requires = f.read().splitlines()
 
-test_requirements = [
-    'pytest'
-]
+test_requirements = [ 'pytest' ]
 
 # If username is in the version file, append it to the package name
 if '__username__' in about:
@@ -44,9 +41,14 @@ setup(
     url=about['__url__'],
     packages=find_packages(exclude=('tests',)),
     include_package_data=True,
-    python_requires='>= 3.6',
+    python_requires='>= 3.7',
     install_requires=requires,
     tests_require=test_requirements,
+    extras_require={
+        'debug': [
+            'colorlog',
+        ],
+    },
     license=about['__license__'],
     classifiers=[
         'Intended Audience :: Developers',
@@ -58,4 +60,8 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
     ],
+    entry_points='''
+        [console_scripts]
+        2ip=twoip.cli:cli
+    ''',
 )
