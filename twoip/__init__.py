@@ -18,8 +18,3 @@ from .__version__ import __version__
 
 # Load main TwoIP module
 from .twoip import TwoIP
-
-# If running module directly, use CLI
-if __name__ == '__main__':
-    from .cli import cli
-    cli()

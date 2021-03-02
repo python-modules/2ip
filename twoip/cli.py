@@ -7,7 +7,7 @@
 # Import external modules
 import click
 import logging as log
-from typing import Tuple, Union
+from typing import Tuple, Optional
 from ipaddress import ip_address
 
 # Import local modules
@@ -101,7 +101,16 @@ def __load_key(file: object) -> str:
 )
 
 # Execute CLI
-def cli(ips: Tuple, key: Union[str, None] = None, keyfile: Union[str, None] = None, verbosity: int = 0) -> None:
+def cli(
+        ## One or more IP's to lookup
+        ips: Tuple,
+        ## An optional API key
+        key: Optional[str] = None,
+        ## An optional API key file
+        keyfile: Optional[str] = None,
+        ## Logging verbosity
+        verbosity: int = 0
+    ) -> None:
     """Perform 2ip.me lookups for one or more IP addresses
     """
     ## Setup logging
@@ -129,11 +138,10 @@ def cli(ips: Tuple, key: Union[str, None] = None, keyfile: Union[str, None] = No
     else:
         log.debug('Using API key from command line option')
 
-    ## Print debugging if required
-    if __debug__:
-        log.trace("Normalized IP's to lookup:")
-        for ip in ips:
-            log.trace(ip)
+    ## Print debugging
+    log.trace("Normalized IP's to lookup:")
+    for ip in ips:
+        log.trace(ip)
 
     ## Create twoip object
     twoip = TwoIP(key = key)
