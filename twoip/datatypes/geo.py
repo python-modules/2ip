@@ -102,26 +102,30 @@ class GeoLookupResult:
             'description'   : 'The zip code',
         },
     )
+    error: Optional[str] = field(
+        default = None,
+        metadata = {
+            'description'   : 'The error message/information if the geo lookup failed',
+        },
+    )
 
     def __post_init__(self) -> object:
         """Function that is executed after creating a new GeoLookupResult object
 
-        This function will currently check and normalize the IP address.
+        This function will currently validate the IP address and then normalize it.
 
         Raises:
             ValueError: IP address cannot be validated
-            RuntimeError: Exception while creating ipaddress object
-
         """
         ## Create IP address object which will validate/normalize the IP
         try:
-            ip = f'{ip_address(self.ip)}'
+            ip = ip_address(self.ip)
         except ValueError as e:
             raise ValueError(f'The IP address "{self.ip}" does not appear to be valid:\n{e}')
         except Exception as e:
             raise RuntimeError(f'Exception creating ipaddress object from IP "{self.ip}":\n{e}')
 
-        ## Set the normalized ip as a string
+        ## Set the normalized IP address string
         self.ip = f'{ip}'
 
     def __str__(self) -> str:
@@ -135,16 +139,22 @@ class GeoLookupResult:
             >>> print(GeoLookupResult(ip = '192.0.2.2', city = 'Somewhere', country = 'Some Country'))
             192.0.2.2                                Some Country         Somewhere
         """
-        ## Set default values for country/city to 'Unknown' if not defined
-        ## This is required as a TypeError will be raised if they are not set
-        if self.country:
-            country = self.country
+        ## Check if there is an error for the IP
+        if self.error:
+            ## Set default values for country/city to error
+            country = 'Error'
+            city = 'Error'
         else:
-            country = 'Unknown'
-        if self.city:
-            city = self.city
-        else:
-            city = 'Unknown'
+            ## Set default values for country/city to 'Unknown' if not defined
+            ## This is required as a TypeError will be raised if they are not set
+            if self.country:
+                country = self.country
+            else:
+                country = 'Unknown'
+            if self.city:
+                city = self.city
+            else:
+                city = 'Unknown'
 
         ## Return the formatted string
         return f'{self.ip:40} {country:20} {city}'
@@ -194,7 +204,78 @@ class GeoLookupResult:
         elif unit == 'mile':
             return (2 * 6371 * asin(sqrt(h))) * 0.62137119
 
-@dataclass
+    def is_global(self) -> bool:
+        """Check if the IP address is globally routable address (eg. not multicast or RFC1918)
+
+        Raises:
+            ValueError: IP address could not be validated
+            RuntimeError: Exception from ip_address
+
+        Returns:
+            bool: True if the IP is globally routable
+
+        Examples:
+            >>> result1 = GeoLookupResult(ip = '10.0.0.0')
+            >>> result2 = GeoLookupResult(ip = '1.0.0.0')
+            >>> result1.is_global()
+            False
+            >>> result2.is_global()
+            True
+        """
+        ## Attempt to create ip_address object for IP
+        try:
+            ip = ip_address(self.ip)
+        except ValueError as e:
+            raise ValueError(f'IP address is not valid:\n{e}')
+        except Exception as e:
+            raise RuntimeError(f'Exception creating ip_address object:\n{e}')
+
+        ## Check if IP is global and return
+        try:
+            is_global = ip.is_global
+        except Exception as e:
+            raise RuntimeError(f'Exception checking if IP address is global:\n{e}')
+        else:
+            return is_global
+
+    def is_private(self) -> bool:
+        """Check if the IP address is private IP address (eg. RFC1918)
+
+        Note: This does NOT include multicast, link local, loopback and other IP's that are not globally routable.
+        This check can be used in conjunction with is_global() to check for other IP types.
+
+        Raises:
+            ValueError: IP address could not be validated
+            RuntimeError: Exception from ip_address
+
+        Returns:
+            bool: True if the IP is private
+
+        Examples:
+            >>> result1 = GeoLookupResult(ip = '10.0.0.0')
+            >>> result2 = GeoLookupResult(ip = '1.0.0.0')
+            >>> result1.is_private()
+            True
+            >>> result2.is_private()
+            False
+        """
+        ## Attempt to create ip_address object for IP
+        try:
+            ip = ip_address(self.ip)
+        except ValueError as e:
+            raise ValueError(f'IP address is not valid:\n{e}')
+        except Exception as e:
+            raise RuntimeError(f'Exception creating ip_address object:\n{e}')
+
+        ## Check if IP is private and return
+        try:
+            is_private = ip.is_private
+        except Exception as e:
+            raise RuntimeError(f'Exception checking if IP address is private:\n{e}')
+        else:
+            return is_private
+
+@dataclass(frozen = False)
 class GeoLookup:
     """Dataclass to store all results from multiple Geo IP lookups
 
@@ -244,31 +325,33 @@ class GeoLookup:
             >>> results = GeoLookup([result1, result2])
             >>> results.to_dict()
             {'192.0.2.1': {'city': None,
-               'city_rus': None,
-               'country': None,
-               'country_rus': None,
-               'country_ua': None,
-               'ip': '192.0.2.1',
-               'latitude': None,
-               'longitude': None,
-               'region': None,
-               'region_rus': None,
-               'region_ua': None,
-               'time_zone': None,
-               'zip_code': None},
+                'city_rus': None,
+                'country': None,
+                'country_rus': None,
+                'country_ua': None,
+                'ip': '192.0.2.1',
+                'latitude': None,
+                'longitude': None,
+                'region': None,
+                'region_rus': None,
+                'region_ua': None,
+                'time_zone': None,
+                'zip_code': None,
+                'error': None},
             '192.0.2.2': {'city': 'Somewhere',
-               'city_rus': None,
-               'country': 'Some Country',
-               'country_rus': None,
-               'country_ua': None,
-               'ip': '192.0.2.2',
-               'latitude': None,
-               'longitude': None,
-               'region': None,
-               'region_rus': None,
-               'region_ua': None,
-               'time_zone': None,
-               'zip_code': None}}
+                'city_rus': None,
+                'country': 'Some Country',
+                'country_rus': None,
+                'country_ua': None,
+                'ip': '192.0.2.2',
+                'latitude': None,
+                'longitude': None,
+                'region': None,
+                'region_rus': None,
+                'region_ua': None,
+                'time_zone': None,
+                'zip_code': None,
+                'error': None}}
         """
         ## Create empty list of results to return
         result_dict = {}

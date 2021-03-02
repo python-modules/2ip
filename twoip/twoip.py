@@ -1,11 +1,29 @@
 # -*- coding: utf-8 -*-
 
 # Import core modules
+import asyncio
 import logging as log
-from typing import Optional
+from functools import lru_cache
+from ipaddress import ip_address
+from pprint import pformat
+from typing import Optional, Union
+from urllib import parse as urlparse
+
+# Import external modules
+import httpx
 
 # Import data types to store results
 from .datatypes.geo import GeoLookup, GeoLookupResult
+from .datatypes.provider import ProviderLookup, ProviderLookupResult
+
+# Import version info to add to HTTP headers
+from .__version__ import __version__
+
+## API URL
+API = 'https://api.2ip.ua'
+## API URI's
+URI_GEO = 'geo.json'
+URI_PROVIDER = 'provider.json'
 
 class TwoIP(object):
     """
@@ -16,7 +34,7 @@ class TwoIP(object):
         ## Optional API key
         key: Optional[str] = None,
         ## The API URL
-        api: str = 'https://api.2ip.ua',
+        api: str = API,
         ## The maximum number of concurrent API HTTP connections allowed
         connections: int = 10,
         ## Allow the use of HTTP2 (requiring the h2 module to be installed)
@@ -42,8 +60,8 @@ class TwoIP(object):
         ## Set httpx options
         self._connections = 10
         self._http2 = http2
-        self.debug(f'Max connections: {connections}')
-        self.debug(f'HTTP2 support: {http2}')
+        log.debug(f'Max connections: {connections}')
+        log.debug(f'HTTP2 support: {http2}')
 
         ## Set API key
         if key:
@@ -53,7 +71,164 @@ class TwoIP(object):
             log.debug(f'Not using API key; rate limits will be applied')
             self._key = None
 
-    def __lookup_geo(self, uri: str = 'geo.json') -> object:
-        pass
+    def lookup(self, ip: Union[str, list], lookup: str = 'geo', ignore: bool = False) -> Union[GeoLookup, ProviderLookup]:
+        """Run a 2ip API lookup for the provided IP address
 
+        Arguments:
+            ip (Union[str, list]): An IP address or list of IP addresses to lookup
+            lookup (str): The type of lookup to perform. Must be one of "geo" or "provider". Defaults to "geo".
+            ignore (bool): Ignore invalid IP addresses. If set to False, lookups for invalid IP's will result in an exception. Defaults to False.
 
+        Returns:
+            Union[GeoLookup, ProviderLookup]: A GeoLookup or ProviderLookup object (a list of GeoLookupResult or ProviderLookupResult objects)
+
+        Raises:
+            RuntimeError: Invalid lookup type
+            ValueError: IP address(es) provided are not valid (if 'ignore' is set to False)
+        """
+        ## Make sure type is set correctly
+        if lookup not in ['geo', 'provider']:
+            log.error(f'Received lookup type "{lookup}" which does not exist')
+            raise RuntimeError(f'Lookup type "{lookup}" is not valid; it must be "geo" or "provider"')
+
+        ## Convert IP to a list if it is a string
+        if type(ip) is str:
+            log.trace(f'Converting single IP address lookup for "{ip}" to a list')
+            ip = [ip]
+
+        ## Logging
+        log.debug(f'Received {lookup} lookup for IP list: {pformat(ip)}')
+
+        ## Normalize and validate the list of IP's
+        ips = self.__normalize(ips = ip, ignore = ignore)
+
+        ## Ensure there is something to do
+        if not ips:
+            log.error('No IP addresses to perform lookup on after normalization')
+            return
+
+        ## Run the lookup(s)
+        if lookup == 'geo':
+            asyncio.run(self.__lookup_geo(ips = ips))
+        # elif lookup == 'provider':
+        #     results = self.__lookup_provider(ips = ips)
+
+    @staticmethod
+    def __normalize(ips: list, ignore: bool) -> list:
+        """Validate and normalize a list of IP addresses
+
+        Args:
+            ips (list): The list of IP addresses to validate and normalize
+            ignore (bool): Ignore invalid IP addresses. If set to False, lookups for invalid IP's will result in an exception. Defaults to False.
+
+        Returns:
+            list: The list of validated/normalized IP's
+        """
+        log.debug('Normalizing list of IP addresses')
+        log.trace(f'Before normalization:\n{pformat(ips)}')
+
+        ## Create list to store validated/normalized IP's
+        normalized = []
+
+        ## Loop over IP's and validate/normalize
+        for ip in ips:
+
+            ## Create IP address object which will validate/normalize the IP
+            log.trace(f'Validating and normalizing IP address "{ip}"')
+            try:
+                ip_obj = ip_address(ip)
+            except ValueError as e:
+                log.error(f'Invalid IP address "{ip}"')
+                if ignore:
+                    log.debug(f'Skipping invalid IP address "{ip}')
+                    continue
+                else:
+                    raise ValueError(f'The IP address "{ip}" does not appear to be valid: {e}')
+            except Exception as e:
+                log.error(f'Exception while validating IP address "{ip}":\n{e}')
+                raise RuntimeError(f'Exception creating ipaddress object from IP "{ip}": {e}')
+
+            ## Check if IP is already in lookup list
+            if f'{ip_obj}' in normalized:
+                log.warning(f'Duplicate IP "{ip_obj}" lookup request; ignoring duplicate')
+                continue
+
+            ## Add the now normalized IP to lookup list
+            log.trace(f'Normalized IP: {ip_obj}')
+            normalized.append(f'{ip_obj}')
+
+        ## Return the normalized IP list
+        log.trace(f'After normalization:\n{pformat(normalized)}')
+        return normalized
+
+    async def __lookup_geo(self, ips: list) -> GeoLookup:
+        """Perform a geo lookup for a list of IP's
+        """
+        ## Generate URL to make request to
+        url = self.__generate_url(api = self._api, uri = URI_GEO)
+
+        ## Create list of tasks
+        task_list = []
+
+        ## Loop over each IP, generate params and add to tasks list
+        for ip in ips:
+            task_list.append(self.__request(url = url, ip = ip))
+
+        ## Wait for results
+        result = await asyncio.gather(*task_list)
+        return result
+
+    @staticmethod
+    def __generate_url(api: str, uri: str) -> str:
+        """Generate the URL to send requests to
+        """
+        parts = list(urlparse.urlparse(api))
+        parts[2] = uri
+        return urlparse.urlunparse(parts)
+
+    @lru_cache(maxsize = 10000)
+    async def __request(self, url: str, ip: str) -> object:
+        """Send a HTTP request to the API
+
+        Args:
+            url (str): The API URL to make the request to
+            params (dict): The parameters to add to the API request
+        """
+        ## Create params
+        params = {
+            'ip': ip,
+        }
+
+        ## Add API key to params if set
+        if self._key:
+            params['key'] = self._key
+
+        ## Create user agent header
+        headers = {
+            'User-Agent': f'TwoIP Python API Client/{__version__}',
+        }
+
+        ## Set maximum number of concurrent connections and keepalive connections
+        limits = httpx.Limits(max_keepalive_connections = 5, max_connections = self._connections)
+
+        ## Debug logging
+        if self._http2: ver = 'HTTP2'
+        else:           ver = 'HTTP1'
+        log.trace(f'New API {ver} request:\n'
+                    f'  - URL: {url}\n'
+                    f'  - Params: {params}\n'
+                    f'  - Headers: {headers}\n'
+                    f'  - Max Connections: {self._connections}'
+        )
+
+        ## Make the API request
+        async with httpx.AsyncClient(limits = limits, http2 = self._http2, headers = headers) as client:
+            try:
+                response = await client.get(url = url, params = params)
+            except Exception as e:
+                log.error(f'Exception while making API request:\n{e}')
+                raise e
+            else:
+                ## Log and return
+                log.trace(f'{response.status_code} Response from API: {response.text}')
+                return response

@@ -145,6 +145,7 @@ class Log(object):
             logging.basicConfig(
                 format = f'{log_format}',
                 datefmt = date_format,
+                style = '{',
             )
 
         if colorlog_imported:

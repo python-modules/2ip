@@ -7,8 +7,9 @@
 # Import external modules
 import click
 import logging as log
-from typing import Tuple, Optional
 from ipaddress import ip_address
+from pprint import pformat
+from typing import Tuple, Optional
 
 # Import local modules
 from .log import Log as logger
@@ -139,12 +140,13 @@ def cli(
         log.debug('Using API key from command line option')
 
     ## Print debugging
-    log.trace("Normalized IP's to lookup:")
-    for ip in ips:
-        log.trace(ip)
+    log.trace(f'CLI lookup for IP addresses:\n{pformat(ips)}')
 
     ## Create twoip object
     twoip = TwoIP(key = key)
+
+    ## Perform lookups
+    results = twoip.lookup(ips)
 
 # Allow using env vars for options
 if __name__ == '__main__':
