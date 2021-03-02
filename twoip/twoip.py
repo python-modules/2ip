@@ -107,11 +107,24 @@ class TwoIP(object):
             log.error('No IP addresses to perform lookup on after normalization')
             return
 
-        ## Run the lookup(s)
+        ## Generate the URL to send requests to
         if lookup == 'geo':
-            asyncio.run(self.__lookup_geo(ips = ips))
-        # elif lookup == 'provider':
-        #     results = self.__lookup_provider(ips = ips)
+            url = self.__generate_url(api = self._api, uri = URI_GEO)
+        elif lookup == 'provider':
+            url = self.__generate_url(api = self._api, uri = URI_PROVIDER)
+        else:
+            raise RuntimeError(f'Lookup URL generator for type "{lookup}" is missing')
+
+        ## Gather the results
+        results = asyncio.run(self.__lookup(url = url, ips = ips))
+
+        ## Parse the results
+        parsed = self.__parse(results = results)
+
+    @staticmethod
+    def __parse(results: list):
+        for result in results:
+            print(result.json())
 
     @staticmethod
     def __normalize(ips: list, ignore: bool) -> list:
@@ -161,18 +174,23 @@ class TwoIP(object):
         log.trace(f'After normalization:\n{pformat(normalized)}')
         return normalized
 
-    async def __lookup_geo(self, ips: list) -> GeoLookup:
+    async def __lookup(self, url: str, ips: list) -> GeoLookup:
         """Perform a geo lookup for a list of IP's
         """
-        ## Generate URL to make request to
-        url = self.__generate_url(api = self._api, uri = URI_GEO)
-
         ## Create list of tasks
         task_list = []
 
         ## Loop over each IP, generate params and add to tasks list
         for ip in ips:
-            task_list.append(self.__request(url = url, ip = ip))
+
+            ## Add IP to api_param if required and encode
+            if self._key:
+                params = urlparse.urlencode({'key': self._key, 'ip': ip})
+            else:
+                params = urlparse.urlencode({'ip': ip})
+
+            ## Generate the task for the lookup of this IP
+            task_list.append(self.__request(url = url, params = params))
 
         ## Wait for results
         result = await asyncio.gather(*task_list)
@@ -187,22 +205,13 @@ class TwoIP(object):
         return urlparse.urlunparse(parts)
 
     @lru_cache(maxsize = 10000)
-    async def __request(self, url: str, ip: str) -> object:
+    async def __request(self, url: str, params: str) -> object:
         """Send a HTTP request to the API
 
         Args:
             url (str): The API URL to make the request to
             params (dict): The parameters to add to the API request
         """
-        ## Create params
-        params = {
-            'ip': ip,
-        }
-
-        ## Add API key to params if set
-        if self._key:
-            params['key'] = self._key
-
         ## Create user agent header
         headers = {
             'User-Agent': f'TwoIP Python API Client/{__version__}',
@@ -224,7 +233,7 @@ class TwoIP(object):
         ## Make the API request
         async with httpx.AsyncClient(limits = limits, http2 = self._http2, headers = headers) as client:
             try:
-                response = await client.get(url = url, params = params)
+                response = await client.get(url = f'{url}?{params}')
             except Exception as e:
                 log.error(f'Exception while making API request:\n{e}')
                 raise e
