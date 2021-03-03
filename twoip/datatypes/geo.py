@@ -108,6 +108,12 @@ class GeoLookupResult:
             'description'   : 'The error message/information if the geo lookup failed',
         },
     )
+    http_code: Optional[int] = field(
+        default = None,
+        metadata = {
+            'description'   : 'The HTTP response code from the API',
+        },
+    )
 
     def __post_init__(self) -> object:
         """Function that is executed after creating a new GeoLookupResult object
@@ -337,7 +343,8 @@ class GeoLookup:
                 'region_ua': None,
                 'time_zone': None,
                 'zip_code': None,
-                'error': None},
+                'error': None,
+                'code': 200},
             '192.0.2.2': {'city': 'Somewhere',
                 'city_rus': None,
                 'country': 'Some Country',
@@ -351,7 +358,8 @@ class GeoLookup:
                 'region_ua': None,
                 'time_zone': None,
                 'zip_code': None,
-                'error': None}}
+                'error': None,
+                'code': 200}}
         """
         ## Create empty list of results to return
         result_dict = {}

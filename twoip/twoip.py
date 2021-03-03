@@ -122,7 +122,7 @@ class TwoIP(object):
         parsed = self.__parse(results = results)
 
     @staticmethod
-    def __parse(results: list):
+    def __parse(results: list, lookup: str):
         for result in results:
             print(result.json())
 
@@ -236,8 +236,10 @@ class TwoIP(object):
                 response = await client.get(url = f'{url}?{params}')
             except Exception as e:
                 log.error(f'Exception while making API request:\n{e}')
-                raise e
+                response = {'error': {e}}
             else:
-                ## Log and return
+                ## Log response
                 log.trace(f'{response.status_code} Response from API: {response.text}')
-                return response
+
+            ## Return response
+            return response

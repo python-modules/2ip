@@ -290,7 +290,8 @@ class ProviderLookup:
                 'range_end': None,
                 'range_start': None,
                 'route': None,
-                'site': None},
+                'site': None,
+                'code': 200},
             '192.0.2.2': {'autonomous_system': 64496,
                 'error': None,
                 'ip': '192.0.2.2',
@@ -301,7 +302,8 @@ class ProviderLookup:
                 'range_end': None,
                 'range_start': None,
                 'route': None,
-                'site': 'https://www.example.com'}}
+                'site': 'https://www.example.com',
+                'code': 200}}
         """
         ## Create empty list of results to return
         result_dict = {}
