@@ -8,7 +8,7 @@ from typing import Union, Optional, List
 LANG = 'ISO 639-1'
 
 @dataclass(frozen = False)
-class ProviderLookupResult:
+class ProviderLookupResult(object):
     """Dataclass to individual results of providder lookups for IP's
 
     Examples:
@@ -225,7 +225,7 @@ class ProviderLookupResult:
             return is_private
 
 @dataclass(frozen = False)
-class ProviderLookup:
+class ProviderLookup(object):
     """Dataclass to store all results from multiple provider lookups
 
     Examples:

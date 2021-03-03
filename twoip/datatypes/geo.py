@@ -9,7 +9,7 @@ from typing import Union, Optional, List
 LANG = 'ISO 639-1'
 
 @dataclass(frozen = False)
-class GeoLookupResult:
+class GeoLookupResult(object):
     """Dataclass to individual results of Geo lookups for IP's
 
     Examples:
@@ -282,7 +282,7 @@ class GeoLookupResult:
             return is_private
 
 @dataclass(frozen = False)
-class GeoLookup:
+class GeoLookup(object):
     """Dataclass to store all results from multiple Geo IP lookups
 
     Examples:
