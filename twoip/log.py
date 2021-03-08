@@ -91,15 +91,15 @@ class Log(object):
             logging.setLogRecordFactory(CustomLogFactory)
             ## Create the output format with debugging info
             log_format = (
-                '{asctime},{msecs:.4f} - '
+                '{asctime},{msecs:08.4f} - '
                 '{levelname:10} - '
-                '{func_origin:30} - '
+                '{func_origin:40} - '
                 '{message:>5}'
             )
         else:
             ## Use basic output format
             log_format = (
-                '{asctime}.{msecs:.0f} - '
+                '{asctime} - '
                 '{levelname:10} - '
                 '{message}'
             )
@@ -157,13 +157,12 @@ class Log(object):
     def __set_log_level(verbosity: int) -> None:
         ## Set the available log levels
         levels = {
-            0: logging.CRITICAL,
-            1: logging.ERROR,
-            2: logging.WARN,
-            3: logging.INFO,
-            4: logging.VERBOSE,
-            5: logging.DEBUG,
-            6: logging.TRACE,
+            0: logging.ERROR,
+            1: logging.WARN,
+            2: logging.INFO,
+            3: logging.VERBOSE,
+            4: logging.DEBUG,
+            5: logging.TRACE,
         }
 
         ## Get the logger
@@ -217,11 +216,17 @@ class Log(object):
             code (int): The exit code to use. Defaults to errno.EINTR.
         """
         logging.critical(message, stacklevel = stacklevel, *args, **kwargs)
-        if __debug__: logging.log(logging.TRACE, f'Exiting with error code {code} due to fatal error', stacklevel = stacklevel)
+        ## Log stack info
+        logging.log(logging.DEBUG, f'Exiting with error code {code} due to fatal error', stack_info = True, stacklevel = stacklevel)
         exit(code)
 
-
 class CustomLogFactory(logging.LogRecord):
+    """Custom logging format settings
+
+    If the script is running in optimized mode this will not be used at all.
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        ## Provide the file name, function name and line number
         self.func_origin = f"{self.filename}.{self.funcName}():{self.lineno}"
