@@ -93,7 +93,7 @@ class Log(object):
             log_format = (
                 '{asctime},{msecs:08.4f} - '
                 '{levelname:10} - '
-                '{func_origin:40} - '
+                '{func_origin:30} - '
                 '{message:>5}'
             )
         else:
