@@ -12,7 +12,7 @@ from pprint import pformat
 from typing import TextIO, Tuple, Optional, Literal
 
 # Import local modules
-from .log import Log as logger
+from .logger import Logger
 from .twoip import TwoIP
 
 # Validator for IP's
@@ -22,7 +22,7 @@ class IPParamType(click.ParamType):
     name = "ip"
 
     def convert(self, value, param, ctx) -> str:
-        """Validate and normalize the IP
+        """Validate and normalize the IP returning the IP address as a string
         """
         log.debug(f'Validating IP address "{value}"')
         try:
@@ -127,7 +127,7 @@ def cli(
     """Perform 2ip.me lookups for one or more IP addresses
     """
     ## Setup logging
-    logger(verbosity = verbosity)
+    Logger(verbosity = verbosity)
 
     ## Remove any duplicate IP's
     ips = tuple(set(ips))
