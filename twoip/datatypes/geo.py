@@ -57,6 +57,13 @@ class GeoLookupResult(object):
             'description'   : 'The region associated with the IP address represented as a string in Ukrainian',
         },
     )
+    country_code: Optional[str] = field(
+        default = None,
+        metadata = {
+            LANG            : 'EN',
+            'description'   : 'The country code associated with the IP address',
+        },
+    )
     country: Optional[str] = field(
         default = None,
         metadata = {
