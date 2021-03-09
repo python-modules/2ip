@@ -9,7 +9,7 @@ import click
 import logging as log
 from ipaddress import ip_address
 from pprint import pformat
-from typing import Tuple, Optional
+from typing import TextIO, Tuple, Optional
 
 # Import local modules
 from .log import Log as logger
@@ -39,7 +39,7 @@ class IPParamType(click.ParamType):
 # Set validator function for click
 IPADDRESS = IPParamType()
 
-def __load_key(file: object) -> str:
+def __load_key(file: TextIO) -> str:
     """Load API key from file
 
     Arguments:
@@ -108,7 +108,7 @@ def cli(
         ## An optional API key
         key: Optional[str] = None,
         ## An optional API key file
-        keyfile: Optional[str] = None,
+        keyfile: Optional[TextIO] = None,
         ## Logging verbosity
         verbosity: int = 0
     ) -> None:
