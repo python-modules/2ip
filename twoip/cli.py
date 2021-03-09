@@ -9,7 +9,7 @@ import click
 import logging as log
 from ipaddress import ip_address
 from pprint import pformat
-from typing import TextIO, Tuple, Optional
+from typing import TextIO, Tuple, Optional, Literal
 
 # Import local modules
 from .log import Log as logger
@@ -24,16 +24,19 @@ class IPParamType(click.ParamType):
     def convert(self, value, param, ctx) -> str:
         """Validate and normalize the IP
         """
+        log.debug(f'Validating IP address "{value}"')
         try:
             # Create ip_address object to test IP is valid
             address = ip_address(value)
         except ValueError:
+            log.warn(f'IP address {value} failed validation')
             self.fail(f'{value!r} is not a valid IP address', param, ctx)
         except Exception as e:
-            self.fail(
-                f'Exception validating IP address "{value!r}": {e}', param, ctx)
+            log.warn(f'Validation of IP address "{value}" raised exception:\n{e}')
+            self.fail(f'Exception validating IP address "{value!r}": {e}', param, ctx)
         else:
             # Return the valid/noramlized IP address if no exception raised
+            log.debug(f'Validated IP address "{value}" successfuly')
             return f'{address}'
 
 # Set validator function for click
@@ -43,7 +46,7 @@ def __load_key(file: TextIO) -> str:
     """Load API key from file
 
     Arguments:
-        file: The file object
+        file (TextIO): The file object
 
     Returns:
         str: The API key
@@ -52,7 +55,7 @@ def __load_key(file: TextIO) -> str:
         ValueError: No API key found
         RunTimeException: Exception reading file
     """
-    log.debug('Attempting to read API key from file object')
+    log.debug(f'Attempting to read API key from file "{file.name}"')
 
     ## Set default value
     key = None
@@ -63,17 +66,17 @@ def __load_key(file: TextIO) -> str:
             if not line.startswith('#'):
                 key = line.strip()
     except Exception as e:
-        log.info('Exception while trying to read API key: {e}')
+        log.warn(f'Exception while trying to read API key from "{file.name}":\n{e}')
         raise RuntimeError(e)
 
     ## If a key was found, return it otherwise raise exception
     if key:
-        log.debug('Retrieved API key from file')
+        log.debug(f'Retrieved API key from file "{file.name}"')
         log.trace(f'Key: {key}')
         return key
     else:
-        log.debug('No API key could be retrieved from file; maybe it is empty')
-        raise ValueError('No API key could be retrieved from file')
+        log.warn(f'No API key could be retrieved from file "{file.name}"; maybe it is empty')
+        raise ValueError(f'No API key could be retrieved from file "{file.name}"')
 
 # Get command line arguments/options
 @click.command()
@@ -96,6 +99,13 @@ def __load_key(file: TextIO) -> str:
     required    =   False,
 )
 @click.option(
+    '-t', '--type', 'type',
+    default         = 'geo',
+    help            = 'The lookup type',
+    show_default    = True,
+    type            = click.Choice(['geo','provider'], case_sensitive = False),
+)
+@click.option(
     '-v', '--verbose', 'verbosity',
     count       =   True,
     help        =   'Set output verbosity level - specify multiple times for further debugging',
@@ -105,12 +115,14 @@ def __load_key(file: TextIO) -> str:
 def cli(
         ## One or more IP's to lookup
         ips: Tuple,
+        ## The lookup type
+        type: Literal['geo','provider'],
         ## An optional API key
         key: Optional[str] = None,
         ## An optional API key file
         keyfile: Optional[TextIO] = None,
         ## Logging verbosity
-        verbosity: int = 0
+        verbosity: int = 0,
     ) -> None:
     """Perform 2ip.me lookups for one or more IP addresses
     """
