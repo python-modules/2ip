@@ -119,12 +119,38 @@ class TwoIP(object):
         results = asyncio.run(self.__lookup(url = url, ips = ips))
 
         ## Parse the results
-        parsed = self.__parse(results = results)
+        parsed = self.__parse(results = results, lookup = lookup)
+
+        ## Return results
+        return parsed
 
     @staticmethod
     def __parse(results: list, lookup: str):
+        """Create GeoLookupResult object from each result
+        """
+        ## Create list to store parsed results
+        parsed = []
+
+        ## Loop over each result
         for result in results:
-            print(result.json())
+
+            ## Parse into the appropriate dataclass
+            if lookup == 'geo':
+                lookup_result = GeoLookupResult(**result.json())
+            elif lookup == 'provider':
+                lookup_result = ProviderLookupResult(**result.json())
+
+            ## Set the HTTP code
+            lookup_result.http_code = result.status_code
+
+            ## Add object to parsed list
+            parsed.append(lookup_result)
+
+        ## Create the parent dataclass with all results
+        parent = GeoLookup(results = parsed)
+
+        ## Return
+        return parent
 
     @staticmethod
     def __normalize(ips: list, ignore: bool) -> list:
