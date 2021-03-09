@@ -11,7 +11,7 @@ import logging
 from sys import exit
 from errno import EINTR
 
-class Log(object):
+class Logger(object):
 
     """
     Logging Module
