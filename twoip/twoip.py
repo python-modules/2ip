@@ -2,25 +2,29 @@
 
 # Import core modules
 import asyncio
-import inspect
-import logging as log
+import logging
 from functools import lru_cache
 from ipaddress import ip_address
 from pprint import pformat
-from typing import Optional, Union
+from typing import Optional, Union, Literal
 from urllib import parse as urlparse
 
 # Import external modules
 import httpx
 
 # Import data types to store results
-from .datatypes.geo import GeoLookup, GeoLookupResult
-from .datatypes.provider import ProviderLookup, ProviderLookupResult
+from .datatypes.geo import Geo
+from .datatypes.georesult import GeoResult
+from .datatypes.provider import Provider
+from .datatypes.providerresult import ProviderResult
 
 # Import version info to add to HTTP headers
 from .__version__ import __version__
 
-## API URL
+# Get logger
+log = logging.getLogger('twoip')
+
+## API base URL
 API = 'https://api.2ip.ua'
 ## API URI's
 URI_GEO = 'geo.json'
@@ -34,7 +38,7 @@ class TwoIP(object):
     def __init__(self,
         ## Optional API key
         key: Optional[str] = None,
-        ## The API URL
+        ## The API base URL
         api: str = API,
         ## The maximum number of concurrent API HTTP connections allowed
         connections: int = 10,
@@ -72,7 +76,7 @@ class TwoIP(object):
             log.debug(f'Not using API key; rate limits will be applied')
             self._key = None
 
-    def lookup(self, ip: Union[str, list], lookup: str = 'geo', ignore: bool = False) -> Union[GeoLookup, ProviderLookup]:
+    def lookup(self, ip: Union[str, list], lookup: str = 'geo', ignore: bool = False) -> Union[GeoResult, ProviderResult]:
         """Run a 2ip API lookup for the provided IP address
 
         Arguments:
@@ -206,7 +210,7 @@ class TwoIP(object):
         log.trace(f'After normalization:\n{pformat(normalized)}')
         return normalized
 
-    async def __lookup(self, url: str, ips: list) -> GeoLookup:
+    async def __lookup(self, url: str, ips: list) -> GeoResult:
         """Perform a geo lookup for a list of IP's
         """
         ## Create list of tasks
@@ -275,26 +279,3 @@ class TwoIP(object):
 
             ## Return response
             return response
-
-    @staticmethod
-    def __caller_name(skip=2):
-        """Get a name of a caller in the format module.class.method
-
-        `skip` specifies how many levels of stack to skip while getting caller
-        name. skip=1 means "who calls me", skip=2 "who calls my caller" etc.
-
-        An empty string is returned if skipped levels exceed stack height
-        """
-        stack = inspect.stack()
-        start = 0 + skip
-        if len(stack) < start + 1: return ''
-        parentframe = stack[start][0]
-        name = []
-        module = inspect.getmodule(parentframe)
-        if module: name.append(module.__name__)
-        if 'self' in parentframe.f_locals:
-            name.append(parentframe.f_locals['self'].__class__.__name__)
-        codename = parentframe.f_code.co_name
-        if codename != '<module>': name.append( codename )
-        del parentframe
-        return ".".join(name)
