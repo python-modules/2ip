@@ -57,7 +57,7 @@ class Logger(object):
         self.__set_log_level(verbosity = verbosity)
 
         ## Logging setup completed
-        logging.verbose('Logging initialized')
+        logging.getLogger('twoip').verbose('Logging initialized')
 
         ## Output colorlog info if it would be enabled
         if colorlog == True and colorlog_setup == False:
@@ -71,12 +71,12 @@ class Logger(object):
         logging.addLevelName(logging.VERBOSE, 'VERBOSE')
 
         ## Set the handlers that will be used to log events at the new levels
-        setattr(logging, 'fatal', self.__log_fatal)
-        setattr(logging, 'trace', self.__log_trace)
-        setattr(logging, 'verbose', self.__log_verbose)
+        setattr(logging.getLogger('twoip'), 'fatal', self.__log_fatal)
+        setattr(logging.getLogger('twoip'), 'trace', self.__log_trace)
+        setattr(logging.getLogger('twoip'), 'verbose', self.__log_verbose)
 
         ## Overwrite the handler for debug level events so that logging can be a noop if not needed
-        setattr(logging, 'debug', self.__log_debug)
+        setattr(logging.getLogger('twoip'), 'debug', self.__log_debug)
 
     @staticmethod
     def __setup(colorlog: bool) -> bool:
