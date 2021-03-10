@@ -4,13 +4,13 @@ from dataclasses import dataclass, field
 from ipaddress import IPv4Address, IPv6Address, IPv4Network, IPv6Network
 from typing import Optional, Union
 
-from .result import Result
+from .baseresult import BaseResult
 
 # Define constant for language standard
 LANG = 'ISO 639-1'
 
 @dataclass(frozen = False)
-class ProviderResult(Result):
+class ProviderResult(BaseResult):
     """Dataclass to individual results of providder lookups for IP's
 
     Examples:
@@ -30,6 +30,7 @@ class ProviderResult(Result):
         compare = False,
         metadata = {
             LANG            : 'EN',
+            'title'         : 'Provider Name',
             'description'   : 'Provider official name in the Internet Routing Registry (IRR) database in English',
         },
     )
@@ -99,6 +100,9 @@ class ProviderResult(Result):
         Raises:
             ValueError: IP address cannot be validated
         """
+        ## Convert the ipaddress object to a string and set in the IP field
+        self.ip = f'{self.ipaddress}'
+
         ## Ensure the route and length is available
         if self.route and self.length:
             ## Check if IPv4 or IPv6 and create the network object

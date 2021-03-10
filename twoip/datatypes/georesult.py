@@ -4,13 +4,13 @@ from dataclasses import dataclass, field
 from math import asin, cos, radians, sin, sqrt
 from typing import Optional
 
-from .result import Result
+from .baseresult import BaseResult
 
 # Define constant for language standard
 LANG = 'ISO 639-1'
 
 @dataclass(frozen = False)
-class GeoResult(Result):
+class GeoResult(BaseResult):
     """Dataclass to individual results of Geo lookups for IP's
 
     Examples:
