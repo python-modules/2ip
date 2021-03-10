@@ -14,16 +14,7 @@ class ProviderResult(BaseResult):
     """Dataclass to individual results of providder lookups for IP's
 
     Examples:
-        >>> result1 = ProviderLookupResult(ip = '192.0.2.1')
-        >>> result2 = ProviderLookupResult(
-            ip = '192.0.2.2',
-            name = 'Some Company',
-            site = 'https://www.example.com',
-            autonomous_system = 64496,
-            range_start = '192.0.2.0',
-            range_end = '192.0.2.255',
-            route = '192.0.2.0',
-            length = '24')
+
     """
     name: Optional[str] = field(
         default = None,
@@ -128,10 +119,7 @@ class ProviderResult(BaseResult):
         Simply return in the format "IP AS Name Site"
 
         Examples:
-            >>> print(ProviderLookupResult(ip = '192.0.2.1'))
-            192.0.2.1                                Unknown    Unknown              Unknown
-            >>> print(ProviderLookupResult(ip = '192.0.2.2', autonomous_system = 64496, name = 'Company', site = 'https://www.example.com'))
-            192.0.2.2                                64496      Company              https://www.example.com
+
         """
         ## Check if there is an error for the IP
         if self.error:
@@ -172,12 +160,7 @@ class ProviderResult(BaseResult):
             bool: True if the IP is globally routable
 
         Examples:
-            >>> result1 = ProviderLookupResult(ip = '10.0.0.0')
-            >>> result2 = ProviderLookupResult(ip = '1.0.0.0')
-            >>> result1.is_global()
-            False
-            >>> result2.is_global()
-            True
+
         """
         ## Check if IP is global and return
         try:
@@ -201,12 +184,7 @@ class ProviderResult(BaseResult):
             bool: True if the IP is private
 
         Examples:
-            >>> result1 = ProviderLookupResult(ip = '10.0.0.0')
-            >>> result2 = ProviderLookupResult(ip = '1.0.0.0')
-            >>> result1.is_private()
-            True
-            >>> result2.is_private()
-            False
+
         """
         ## Check if IP is private and return
         try:

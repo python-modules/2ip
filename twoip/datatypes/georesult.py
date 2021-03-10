@@ -14,8 +14,6 @@ class GeoResult(BaseResult):
     """Dataclass to individual results of Geo lookups for IP's
 
     Examples:
-        >>> result1 = GeoLookupResult(ip = '192.0.2.1')
-        >>> result2 = GeoLookupResult(ip = '192.0.2.2', city = 'Somewhere', country = 'Some Country')
     """
     ## Assign the fields
     city: Optional[str] = field(
@@ -125,10 +123,6 @@ class GeoResult(BaseResult):
         Simply return in the format "IP Country City"
 
         Examples:
-            >>> print(GeoLookupResult(ip = '192.0.2.1'))
-            192.0.2.1                                Unknown              Unknown
-            >>> print(GeoLookupResult(ip = '192.0.2.2', city = 'Somewhere', country = 'Some Country'))
-            192.0.2.2                                Some Country         Somewhere
         """
         ## Check if there is an error for the IP
         if self.error:
@@ -147,11 +141,8 @@ class GeoResult(BaseResult):
             else:
                 city = 'Unknown'
 
-        ## Convert IP to string
-        ip = f'{self.ip}'
-
         ## Return the formatted string
-        return f'{ip:40} {country:20} {city}'
+        return f'{self.ip:40} {country:20} {city}'
 
     def distance_to(self, other: object, unit: str = 'kilometer') -> float:
         """Calculate the distance between the geo location of two different IP's
@@ -170,12 +161,7 @@ class GeoResult(BaseResult):
             RuntimeError: Incorrect unit format specified
 
         Examples:
-            >>> result1 = GeoLookupResult(ip = '192.0.2.1', latitude=80.9739186644168, longitude=164.51642711112837)
-            >>> result2 = GeoLookupResult(ip = '192.0.2.2', latitude=74.05075444437098, longitude=-157.51482442257847)
-            >>> result1.distance_to(result2)
-            1155.9704248739984 ## Result in kilometers
-            >>> result1.distance_to(result2, 'mile')
-            718.286718508762 ## Result in miles
+
         """
         ## Make sure both the objects have a latitude/longitude set
         if not self.latitude or not other.latitude or not self.longitude or not other.longitude:
@@ -209,12 +195,7 @@ class GeoResult(BaseResult):
             bool: True if the IP is globally routable
 
         Examples:
-            >>> result1 = GeoLookupResult(ip = '10.0.0.0')
-            >>> result2 = GeoLookupResult(ip = '1.0.0.0')
-            >>> result1.is_global()
-            False
-            >>> result2.is_global()
-            True
+
         """
         ## Check if IP is global and return
         try:
@@ -238,12 +219,7 @@ class GeoResult(BaseResult):
             bool: True if the IP is private
 
         Examples:
-            >>> result1 = GeoLookupResult(ip = '10.0.0.0')
-            >>> result2 = GeoLookupResult(ip = '1.0.0.0')
-            >>> result1.is_private()
-            True
-            >>> result2.is_private()
-            False
+
         """
         ## Check if IP is private and return
         try:
