@@ -97,7 +97,7 @@ class TwoIP(object):
         ## Create httpx limits object
         self.limits = httpx.Limits(max_keepalive_connections = 5, max_connections = self._connections)
 
-    def geo(self, ip: Union[List[Union[IPv4Address, IPv6Address, str]], str]) -> Geo:
+    def geo(self, ip: Union[List[Union[IPv4Address, IPv6Address, str]], IPv4Address, IPv6Address, str]) -> Geo:
         """Perform a geo lookup for one or more IP addresses
 
         Args:
@@ -112,7 +112,7 @@ class TwoIP(object):
         ## Call the Geo lookup function
         return self.__lookup(ip = ip, lookup_type = 'geo')
 
-    def provider(self, ip: Union[List[Union[IPv4Address, IPv6Address, str]], str]) -> Provider:
+    def provider(self, ip: Union[List[Union[IPv4Address, IPv6Address, str]], IPv4Address, IPv6Address, str]) -> Provider:
         """Perform a provider lookup for one or more IP addresses
 
         Args:
@@ -127,7 +127,7 @@ class TwoIP(object):
         ## Call the provider lookup function
         return self.__lookup(ip = ip, lookup_type = 'provider')
 
-    def __lookup(self, ip: Union[List[Union[IPv4Address, IPv6Address, str]], str], lookup_type: Literal['geo', 'provider']) -> Union[Geo, Provider]:
+    def __lookup(self, ip: Union[List[Union[IPv4Address, IPv6Address, str]], IPv4Address, IPv6Address, str], lookup_type: Literal['geo', 'provider']) -> Union[Geo, Provider]:
         ## If a string was provided, convert to list
         if type(ip) == str:
             log.verbose('Lookup for single IP address; converting to list with single entry')
@@ -337,7 +337,8 @@ class TwoIP(object):
         ## Create the GeoResult object
         log.trace(f'Creating GeoResult object from data:\n{pformat(filtered)}')
         try:
-            georesult = GeoResult(ipaddress = result['ip'], **filtered)
+            georesult = GeoResult(ipaddress = result['ip'], api_response_raw = response_text,
+                            http_code = status_code, **filtered)
         except Exception as e:
             log.error(f'Exception creating GeoResult object from API response:\n{e}')
             return GeoResult(ipaddress = result['ip'], error = e,
@@ -411,19 +412,6 @@ class TwoIP(object):
         log.trace(f'Removing any API fields that match filter:\n{pformat(empty)}')
         filtered = dict(filter(lambda d: d[1] not in empty, extracted.items()))
 
-        ## Set IP range start and end address to strings
-
-        # ## Create the GeoResult object
-        # log.trace(f'Creating GeoResult object from data:\n{pformat(filtered)}')
-        # try:
-        #     georesult = GeoResult(ipaddress = result['ip'], **filtered)
-        # except Exception as e:
-        #     log.error(f'Exception creating GeoResult object from API response:\n{e}')
-        #     return GeoResult(ipaddress = result['ip'], error = e,
-        #             api_response_raw = response_text, http_code = status_code)
-
-        # ## Finally return the object
-        # return georesult
 
     @staticmethod
     def __generate_url(api: str, uri: str) -> str:
