@@ -51,6 +51,8 @@ class BaseResult(object):
 
     def __post_init__(self) -> object:
         """Function that is executed after creating a new BaseResult object
+
+        Currently this function will create the ip attribute to represent the IP address as a string.
         """
         ## Convert the ipaddress object to a string and set in the IP field
         self.ip = f'{self.ipaddress}'
