@@ -17,6 +17,28 @@ class Base(object):
 
         Returns:
             dict: The generated dict
+
+        Examples:
+            >>> result1 = GeoResult(ipaddress = IPv4Address('192.0.2.0'), city = 'Some City', country = 'Some Country')
+            >>> result2 = GeoResult(ipaddress = IPv6Address('2001:0db8::1'), city = 'Some City', country = 'Some Country')
+            >>> geo_results = Geo(results = [result1, result2])
+            >>> geo_results.to_dict()
+            {
+                '192.0.2.0': {
+                    'ip': '192.0.2.0',
+                    'ipaddress': IPv4Address('192.0.2.0'),
+                    'city': 'Some City',
+                    'country': 'Some Country',
+                    ...
+                },
+                '2001:0db8::1': {
+                    'ip': '2001:0db8::1,
+                    'ipaddress': IPv6Address('2001:0db8::1'),
+                    'city': 'Some City',
+                    'country': 'Some Country',
+                    ...
+                },
+            }
         """
         ## Create empty list of results to return
         result_dict: dict = {}
@@ -43,6 +65,16 @@ class Base(object):
 
         Returns:
             list: The list of results
+
+        Examples:
+            >>> result1 = GeoResult(ipaddress = IPv4Address('192.0.2.0'), city = 'Some City', country = 'Some Country')
+            >>> result2 = GeoResult(ipaddress = IPv6Address('2001:0db8::1'), city = 'Some City', country = 'Some Country')
+            >>> geo_results = Geo(results = [result1, result2])
+            >>> geo_results.retrieve_data(fields = ['ip', 'city', 'country'])
+            [
+                ['192.0.2.0', 'Some City', 'Some Country'],
+                ['2001:0db8::1', 'Some City', 'Some Country'],
+            ]
         """
 
         ## Create empty dict to store the data
@@ -78,6 +110,11 @@ class Base(object):
         Raises:
             KeyError: Requested field does not exist
             ValueError: Requested field is not allowed to be output into table
+
+        Examples:
+            >>> sample = GeoResult(ipaddress = IPv4Address('192.0.2.0'))
+            >>> Geo.headers(sample = sample, fields = ['ip', 'country'])
+            ['IP Address', 'Country']
         """
         ## Create dict to store table headers
         headers = []
