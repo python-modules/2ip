@@ -161,6 +161,9 @@ class TwoIP(object):
         else:
             raise RuntimeError(f'Lookup URL generator for type "{lookup_type}" is missing')
 
+        ## Print cache info
+        log.verbose(f'Request cache status:\n{self.__request.cache_info()}')
+
         ## Generate and run the list of tasks
         log.info('Running asyncio function to generate and send API requests')
         results: List[dict] = asyncio.run(self.__generate_tasks(ips = ips, url = url))
@@ -168,6 +171,9 @@ class TwoIP(object):
         ## Parse the results
         log.info('HTTP requests finished, parsing results')
         parsed_results = self.__parse_results(results = results, lookup_type = lookup_type)
+
+        ## Print cache info
+        log.verbose(f'Request cache status:\n{self.__request.cache_info()}')
 
         ## Return the results
         log.info('Finished parsing, returning results')
