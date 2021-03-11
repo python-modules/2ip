@@ -153,6 +153,12 @@ class Logger(object):
         else:
             return False
 
+    def level(self, verbosity: int) -> None:
+        """Set the log level
+        """
+        ## Call the __set_log_level function
+        self.__set_log_level(verbosity = verbosity)
+
     @staticmethod
     def __set_log_level(verbosity: int) -> None:
         ## Set the available log levels
