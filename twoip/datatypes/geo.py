@@ -51,7 +51,7 @@ class Geo(Base):
         sample = GeoResult(ipaddress = IPv4Address('192.0.2.0'))
 
         ## Retrieve headers
-        headers = self.__retrieve_headers(sample = sample, fields = fields)
+        headers = self.headers(sample = sample, fields = fields)
 
         ## Return the headers
         return headers
@@ -71,7 +71,7 @@ class Geo(Base):
         headers = self.__generate_headers(fields = fields)
 
         ## Retrieve the data
-        data = self.__retrieve_data(results = self.results, fields = fields)
+        data = self.retrieve_data(fields = fields)
 
         ## Generate and return table
         return tabulate(tabular_data = data, headers = headers, tablefmt = 'pretty')
@@ -92,7 +92,7 @@ class Geo(Base):
         headers = self.__generate_headers(fields = fields)
 
         ## Retrieve the data
-        data = self.__retrieve_data(results = self.results, fields = fields)
+        data = self.retrieve_data(fields = fields)
 
         ## Generate the CSV
         output = StringIO()
@@ -101,15 +101,3 @@ class Geo(Base):
 
         ## Return the CSV
         return output.getvalue()
-
-    def to_dict(self) -> dict:
-        """Format multiple geo lookup results into a dict
-
-        The dict will have the key for each entry set to the IP address that was looked up.
-
-        Returns:
-            dict: The generated dict
-
-        Examples:
-        """
-        return self.__to_dict(results = self.results)

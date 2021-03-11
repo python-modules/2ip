@@ -9,8 +9,7 @@ class Base(object):
 
     This dataclass is used for both Geo and Provider lookup result types.
     """
-    @staticmethod
-    def __to_dict(results: List[object]) -> dict:
+    def to_dict(self) -> dict:
         """Generate dict from a list of results using the IP address as a key for each entry
 
         Args:
@@ -23,7 +22,7 @@ class Base(object):
         result_dict: dict = {}
 
         ## Loop over each result
-        for result in results:
+        for result in self.results:
 
             ## Skip any duplicate results
             if result.ip in result_dict:
@@ -35,8 +34,7 @@ class Base(object):
         ## Return results
         return result_dict
 
-    @staticmethod
-    def __retrieve_data(results: List[object], fields: List[str]) -> list:
+    def retrieve_data(self, fields: List[str]) -> list:
         """Loop over each result and retrieve the requested attributes/fields
 
         Args:
@@ -51,7 +49,7 @@ class Base(object):
         data: List[List[str]] = []
 
         ## Loop over each result
-        for result in results:
+        for result in self.results:
 
             ## Create list to store the table data for this result
             result_data: List[str] = []
@@ -67,8 +65,8 @@ class Base(object):
         return data
 
     @staticmethod
-    def __retrieve_headers(sample: object, fields: List[str]) -> list:
-        """Generate headers from a list of fields
+    def headers(sample: object, fields: List[str]) -> list:
+        """Generate table/CSV headers from a list of fields
 
         Args:
             sample (object): A sample object to generate the headers from

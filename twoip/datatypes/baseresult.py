@@ -16,7 +16,7 @@ class BaseResult(object):
         compare = False,
         metadata = {
             'title'         : 'IP Address',
-            'description'   : 'The IP address that was looked up',
+            'description'   : 'The IP address that was looked up represented as a string',
         },
     )
     ipaddress: Union[IPv4Address, IPv6Address] = field(
@@ -111,3 +111,46 @@ class BaseResult(object):
 
         ## Return output
         return '\n'.join(output)
+
+    def is_global(self) -> bool:
+        """Check if the IP address is globally routable address (eg. not multicast or RFC1918)
+
+        Raises:
+            RuntimeError: Exception from ip_address
+
+        Returns:
+            bool: True if the IP is globally routable
+
+        Examples:
+
+        """
+        ## Check if IP is global and return
+        try:
+            is_global = self.ipaddress.is_global
+        except Exception as e:
+            raise RuntimeError(f'Exception checking if IP address is global:\n{e}')
+        else:
+            return is_global
+
+    def is_private(self) -> bool:
+        """Check if the IP address is private IP address (eg. RFC1918)
+
+        Note: This does NOT include multicast, link local, loopback and other IP's that are not globally routable.
+        This check can be used in conjunction with is_global() to check for other IP types.
+
+        Raises:
+            RuntimeError: Exception from ip_address
+
+        Returns:
+            bool: True if the IP is private
+
+        Examples:
+
+        """
+        ## Check if IP is private and return
+        try:
+            is_private = self.ipaddress.is_private
+        except Exception as e:
+            raise RuntimeError(f'Exception checking if IP address is private:\n{e}')
+        else:
+            return is_private

@@ -21,6 +21,7 @@ class GeoResult(BaseResult):
         compare = False,
         metadata = {
             LANG            : 'EN',
+            'title'         : 'City',
             'description'   : 'The city associated with the IP address represented as a string in English',
         },
     )
@@ -29,6 +30,7 @@ class GeoResult(BaseResult):
         compare = False,
         metadata = {
             LANG            : 'RU',
+            'title'         : 'City (RU)',
             'description'   : 'The city associated with the IP address represented as a string in Russian',
         },
     )
@@ -37,6 +39,7 @@ class GeoResult(BaseResult):
         compare = False,
         metadata = {
             LANG            : 'EN',
+            'title'         : 'Region',
             'description'   : 'The region associated with the IP address represented as a string in English',
         },
     )
@@ -45,6 +48,7 @@ class GeoResult(BaseResult):
         compare = False,
         metadata = {
             LANG            : 'RU',
+            'title'         : 'Region (RU)',
             'description'   : 'The region associated with the IP address represented as a string in Russian',
         },
     )
@@ -53,6 +57,7 @@ class GeoResult(BaseResult):
         compare = False,
         metadata = {
             LANG            : 'UK',
+            'title'         : 'Region (UK)',
             'description'   : 'The region associated with the IP address represented as a string in Ukrainian',
         },
     )
@@ -61,6 +66,7 @@ class GeoResult(BaseResult):
         compare = False,
         metadata = {
             LANG            : 'EN',
+            'title'         : 'Country Code',
             'description'   : 'The country code associated with the IP address',
         },
     )
@@ -69,6 +75,7 @@ class GeoResult(BaseResult):
         compare = False,
         metadata = {
             LANG            : 'EN',
+            'title'         : 'Country',
             'description'   : 'The city associated with the IP address represented as a string in English',
         },
     )
@@ -77,6 +84,7 @@ class GeoResult(BaseResult):
         compare = False,
         metadata = {
             LANG            : 'RU',
+            'title'         : 'Country (RU)',
             'description'   : 'The city associated with the IP address represented as a string in Russian',
         },
     )
@@ -85,6 +93,7 @@ class GeoResult(BaseResult):
         compare = False,
         metadata = {
             LANG            : 'UK',
+            'title'         : 'Country (UK)',
             'description'   : 'The city associated with the IP address represented as a string in Ukrainian',
         },
     )
@@ -92,6 +101,7 @@ class GeoResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
+            'title'         : 'Latitude',
             'description'   : 'The latitude',
         },
     )
@@ -99,6 +109,7 @@ class GeoResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
+            'title'         : 'Longitude',
             'description'   : 'The longitude',
         },
     )
@@ -106,6 +117,7 @@ class GeoResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
+            'title'         : 'Time Zone',
             'description'   : 'The time zone',
         },
     )
@@ -113,7 +125,8 @@ class GeoResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
-            'description'   : 'The zip code',
+            'title'         : 'ZIP Code',
+            'description'   : 'The ZIP code',
         },
     )
 
@@ -183,48 +196,3 @@ class GeoResult(BaseResult):
             return 2 * 6371 * asin(sqrt(h))
         elif unit == 'mile':
             return (2 * 6371 * asin(sqrt(h))) * 0.62137119
-
-    def is_global(self) -> bool:
-        """Check if the IP address is globally routable address (eg. not multicast or RFC1918)
-
-        Raises:
-            ValueError: IP address could not be validated
-            RuntimeError: Exception from ip_address
-
-        Returns:
-            bool: True if the IP is globally routable
-
-        Examples:
-
-        """
-        ## Check if IP is global and return
-        try:
-            is_global = self.ip.is_global
-        except Exception as e:
-            raise RuntimeError(f'Exception checking if IP address is global:\n{e}')
-        else:
-            return is_global
-
-    def is_private(self) -> bool:
-        """Check if the IP address is private IP address (eg. RFC1918)
-
-        Note: This does NOT include multicast, link local, loopback and other IP's that are not globally routable.
-        This check can be used in conjunction with is_global() to check for other IP types.
-
-        Raises:
-            ValueError: IP address could not be validated
-            RuntimeError: Exception from ip_address
-
-        Returns:
-            bool: True if the IP is private
-
-        Examples:
-
-        """
-        ## Check if IP is private and return
-        try:
-            is_private = self.ip.is_private
-        except Exception as e:
-            raise RuntimeError(f'Exception checking if IP address is private:\n{e}')
-        else:
-            return is_private
