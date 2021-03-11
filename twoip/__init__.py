@@ -8,10 +8,10 @@ This API client will send requests for various information to 2ip.me and provide
 
 # Import logging
 import logging
-from logging import NullHandler
+from .logger import Logger
 
-# Set default logging handler to avoid "No handler found" warnings.
-logging.getLogger(__name__).addHandler(NullHandler())
+# Enable logging
+Logger()
 
 # Import version info
 from .__version__ import __version__
