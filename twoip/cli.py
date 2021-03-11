@@ -14,6 +14,9 @@ from typing import TextIO, Tuple, Optional, Literal, Union, List
 from .logger import Logger
 from .twoip import TwoIP
 
+from .datatypes.geo import Geo
+from .datatypes.provider import Provider
+
 # Get logger
 log = logging.getLogger('twoip')
 
@@ -197,10 +200,20 @@ def cli(
             log.trace(f'{address}')
 
     ## Perform lookups
-    results = twoip.lookup(ip = ip, provider = provider)
+    if provider == 'geo':
+        results: Geo = twoip.geo(ip = ip)
+    elif provider == 'provider':
+        results: Provider = twoip.provider(ip = ip)
+    else:
+        log.fatal(f'Provider lookup type {provider} has not been defined')
 
     ## Print the results in the requested format
-    print(results)
+    if output == 'table':
+        print(results.to_table())
+    elif output == 'csv':
+        print(results.to_csv())
+    else:
+        log.fatal(f'Output type {output} has not been defined')
 
 # Allow using env vars for options
 if __name__ == '__main__':
