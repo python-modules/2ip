@@ -151,6 +151,29 @@ IPADDRESS = IPParamType()
     type            = click.Choice(['table','csv'], case_sensitive = False),
 )
 @click.option(
+    '-s', '--strict', 'strict',
+    default         = False,
+    help            = 'Strict mode - any errors will return an exception',
+    show_default    = True,
+    type            = bool,
+    is_flag         = True,
+)
+@click.option(
+    '-h2', '--http2', 'http2',
+    default         = True,
+    help            = 'Enable HTTP2 support for querying API',
+    show_default    = True,
+    type            = bool,
+    is_flag         = True,
+)
+@click.option(
+    '-c', '--connections', 'connections',
+    default         = 10,
+    help            = 'Maximum number of HTTP connections to open to API',
+    show_default    = True,
+    type            = click.IntRange(1, 100, clamp = True),
+)
+@click.option(
     '-v', '--verbose', 'verbosity',
     count       =   True,
     help        =   'Set output verbosity level - specify multiple times for further debugging',
@@ -168,6 +191,12 @@ def cli(
         keyfile: Optional[TextIO] = None,
         ## The output format
         output: Literal['table','csv'] = 'table',
+        ## Strict mode
+        strict: bool = False,
+        ## Maximum HTTP connections
+        connections: int = 10,
+        ## Enable HTTP2
+        http2: bool = True,
         ## Logging verbosity
         verbosity: int = 0,
     ) -> None:
@@ -190,8 +219,17 @@ def cli(
     if key or keyfile:
         key = __key(key = key, keyfile = keyfile)
 
+    ## Make sure no more than 100 connections to API are used
+    if connections < 1 or connections > 100:
+        log.fatal(f'A minimum of 1 connection and a maximum of 100 connections must be used')
+
     ## Create twoip object
-    twoip = TwoIP(key = key)
+    twoip = TwoIP(
+        key = key,
+        strict = strict,
+        connections = connections,
+        http2 = http2,
+    )
 
     ## Debugging
     if __debug__ and verbosity >= 5:
