@@ -6,9 +6,6 @@ from typing import Optional
 
 from .baseresult import BaseResult
 
-# Define constant for language standard
-LANG = 'ISO 639-1'
-
 @dataclass(frozen = False)
 class GeoResult(BaseResult):
     """Dataclass to individual results of Geo lookups for IP's
@@ -20,7 +17,7 @@ class GeoResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
-            LANG            : 'EN',
+            'lang'          : 'EN',
             'title'         : 'City',
             'description'   : 'The city associated with the IP address represented as a string in English',
         },
@@ -29,7 +26,7 @@ class GeoResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
-            LANG            : 'RU',
+            'lang'          : 'RU',
             'title'         : 'City (RU)',
             'description'   : 'The city associated with the IP address represented as a string in Russian',
         },
@@ -38,7 +35,7 @@ class GeoResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
-            LANG            : 'EN',
+            'lang'          : 'EN',
             'title'         : 'Region',
             'description'   : 'The region associated with the IP address represented as a string in English',
         },
@@ -47,7 +44,7 @@ class GeoResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
-            LANG            : 'RU',
+            'lang'          : 'RU',
             'title'         : 'Region (RU)',
             'description'   : 'The region associated with the IP address represented as a string in Russian',
         },
@@ -56,8 +53,8 @@ class GeoResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
-            LANG            : 'UK',
-            'title'         : 'Region (UK)',
+            'lang'          : 'UA',
+            'title'         : 'Region (UA)',
             'description'   : 'The region associated with the IP address represented as a string in Ukrainian',
         },
     )
@@ -65,7 +62,6 @@ class GeoResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
-            LANG            : 'EN',
             'title'         : 'Country Code',
             'description'   : 'The country code associated with the IP address',
         },
@@ -74,7 +70,7 @@ class GeoResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
-            LANG            : 'EN',
+            'lang'          : 'EN',
             'title'         : 'Country',
             'description'   : 'The city associated with the IP address represented as a string in English',
         },
@@ -83,7 +79,7 @@ class GeoResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
-            LANG            : 'RU',
+            'lang'          : 'RU',
             'title'         : 'Country (RU)',
             'description'   : 'The city associated with the IP address represented as a string in Russian',
         },
@@ -92,8 +88,8 @@ class GeoResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
-            LANG            : 'UK',
-            'title'         : 'Country (UK)',
+            'lang'          : 'UA',
+            'title'         : 'Country (UA)',
             'description'   : 'The city associated with the IP address represented as a string in Ukrainian',
         },
     )

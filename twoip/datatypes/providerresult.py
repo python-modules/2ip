@@ -6,9 +6,6 @@ from typing import Optional, Union
 
 from .baseresult import BaseResult
 
-# Define constant for language standard
-LANG = 'ISO 639-1'
-
 @dataclass(frozen = False)
 class ProviderResult(BaseResult):
     """Dataclass to individual results of providder lookups for IP's
@@ -20,7 +17,7 @@ class ProviderResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
-            LANG            : 'EN',
+            'lang'          : 'EN',
             'title'         : 'Provider Name',
             'description'   : 'Provider official name in the Internet Routing Registry (IRR) database in English',
         },
@@ -29,7 +26,7 @@ class ProviderResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
-            LANG            : 'RU',
+            'lang'          : 'RU',
             'description'   : 'Provider official name in the Internet Routing Registry (IRR) database in Russian',
         },
     )
