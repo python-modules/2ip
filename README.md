@@ -74,6 +74,28 @@ $ 2ip 1.1.1.1
 TODO
 ```
 
+### Auto complete
+
+The shell auto completion file can be generated like this:
+
+```bash
+## For bash
+_2IP_COMPLETE=source_bash 2ip
+
+## For ZSH
+_2IP_COMPLETE=source_zsh 2ip
+
+## For fish
+_2IP_COMPLETE=source_fish 2ip
+```
+
+To get auto complete for the current shell you can eval the code directly:
+
+```bash
+## For bash
+eval "$(_2IP_COMPLETE=source_bash 2ip)"
+```
+
 ## Methods
 
 The following methods are available.
