@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 from ipaddress import IPv4Address, IPv6Address
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Tuple
 
 @dataclass(frozen = False)
 class BaseResult(object):
@@ -48,6 +48,22 @@ class BaseResult(object):
             'description'   : 'The error message/information if the geo lookup failed',
         },
     )
+    success: bool = field(
+        init = False,
+        compare = False,
+        metadata = {
+            'title'         : 'Success',
+            'description'   : 'If the lookup was successful or not',
+        },
+    )
+    success_icon: str = field(
+        init = False,
+        compare = False,
+        metadata = {
+            'title'         : 'Success',
+            'description'   : 'If the lookup was successful or not (icon format)',
+        },
+    )
 
     def __post_init__(self) -> object:
         """Function that is executed after creating a new BaseResult object
@@ -56,6 +72,14 @@ class BaseResult(object):
         """
         ## Convert the ipaddress object to a string and set in the IP field
         self.ip = f'{self.ipaddress}'
+
+        ## Check if the HTTP status is 200 and if there is any error; if not the lookup was successful
+        if self.http_code == 200 and not self.error:
+            self.success = True,
+            self.success_icon = '✔'
+        else:
+            self.success = True,
+            self.success_icon = '✖'
 
     def get_meta(self, field: str, name: str) -> str:
         """Retrieve metadata for a field
@@ -156,3 +180,24 @@ class BaseResult(object):
             raise RuntimeError(f'Exception checking if IP address is private:\n{e}')
         else:
             return is_private
+
+    def fields(self) -> List[Tuple(str, str)]:
+        """Return a list of available fields and their titles
+
+        Returns:
+            List[Tuple(str, str)]: The list of fields. Each field is a tuple in the format (field, Title)
+        """
+        ## Create list to store fields
+        fields = []
+
+        ## Loop each attribute
+        for field in self.__dataclass_fields__:
+
+            ## Attempt to get field title - if there is a result it can be added to output
+            try:
+                fields.append((f'{field}', f'{self.get_meta(field = field, name = "title")}'))
+            except Exception:
+                pass
+
+        ## Return list of fields
+        return fields

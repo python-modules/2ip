@@ -91,6 +91,14 @@ class ProviderResult(BaseResult):
         ## Convert the ipaddress object to a string and set in the IP field
         self.ip = f'{self.ipaddress}'
 
+        ## Check if the HTTP status is 200 and if there is any error; if not the lookup was successful
+        if self.http_code == 200 and not self.error:
+            self.success = True,
+            self.success_icon = '✔'
+        else:
+            self.success = True,
+            self.success_icon = '✖'
+
         ## Ensure the route and length is available
         if self.route and self.length:
             ## Check if IPv4 or IPv6 and create the network object
