@@ -17,11 +17,11 @@ from .twoip import TwoIP
 from .datatypes.geo import Geo
 from .datatypes.provider import Provider
 
+# Import version info
+from .__version__ import __version__
+
 # Get logger
 log = logging.getLogger('twoip')
-
-# Allow use of --help and -h for click
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 def __key(key: str = None, keyfile: TextIO = None) -> Union[str, None]:
     """If API key and/or keyfile defined, pick one and return the API key
@@ -92,6 +92,14 @@ def __load_key(file: TextIO) -> str:
         log.warn(f'No API key could be retrieved from file "{file.name}"; maybe it is empty')
         raise ValueError(f'No API key could be retrieved from file "{file.name}"')
 
+def __version(ctx, param, value):
+    """Print the version of the TwoIP module and exit
+    """
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo(f'TwoIP Version {__version__}')
+    ctx.exit()
+
 # Validator for IP's
 class IPParamType(click.ParamType):
     """IP parameter validator
@@ -120,12 +128,28 @@ class IPParamType(click.ParamType):
 IPADDRESS = IPParamType()
 
 # Get command line arguments/options
-@click.command(context_settings = CONTEXT_SETTINGS)
+# Allow use of --help and -h for click
+@click.command(context_settings = dict(help_option_names=['-h', '--help']))
 @click.argument(
     'ip',
     nargs       =   -1,
     required    =   True,
     type        =   IPADDRESS,
+)
+@click.option(
+    '-c', '--connections', 'connections',
+    default         = 10,
+    help            = 'Maximum number of HTTP connections to open to API',
+    show_default    = True,
+    type            = click.IntRange(1, 100, clamp = True),
+)
+@click.option(
+    '-h2', '--http2', 'http2',
+    default         = True,
+    help            = 'Enable HTTP2 support for querying API',
+    show_default    = True,
+    type            = bool,
+    is_flag         = True,
 )
 @click.option(
     '-k', '--key', 'key',
@@ -138,13 +162,6 @@ IPADDRESS = IPParamType()
     help        =   'The optional API key file for 2ip.me',
     type        =   click.File(mode = 'r'),
     required    =   False,
-)
-@click.option(
-    '-t', '--type', 'provider',
-    default         = 'geo',
-    help            = 'The lookup provider/type (geo for geographic information or provider for provider information)',
-    show_default    = True,
-    type            = click.Choice(['geo','provider'], case_sensitive = False),
 )
 @click.option(
     '-o', '--output', 'output',
@@ -162,19 +179,19 @@ IPADDRESS = IPParamType()
     is_flag         = True,
 )
 @click.option(
-    '-h2', '--http2', 'http2',
-    default         = True,
-    help            = 'Enable HTTP2 support for querying API',
+    '-t', '--type', 'provider',
+    default         = 'geo',
+    help            = 'The lookup provider/type (geo for geographic information or provider for provider information)',
     show_default    = True,
-    type            = bool,
-    is_flag         = True,
+    type            = click.Choice(['geo','provider'], case_sensitive = False),
 )
 @click.option(
-    '-c', '--connections', 'connections',
-    default         = 10,
-    help            = 'Maximum number of HTTP connections to open to API',
-    show_default    = True,
-    type            = click.IntRange(1, 100, clamp = True),
+    '-V', '--version',
+    is_flag         = True,
+    callback        = __version,
+    expose_value    = False,
+    is_eager        = True,
+    help            = 'Print version and exit',
 )
 @click.option(
     '-v', '--verbose', 'verbosity',
@@ -200,6 +217,8 @@ def cli(
         connections: int = 10,
         ## Enable HTTP2
         http2: bool = True,
+        ## Output fields
+        fields: Optional[List[str]] = None,
         ## Logging verbosity
         verbosity: int = 0,
     ) -> None:
