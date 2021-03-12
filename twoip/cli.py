@@ -285,15 +285,22 @@ def cli(
     assert provider in ['geo','provider']
     assert output in ['table','csv']
 
-    ## Get list of fields available
-    available_fields = __fields(provider = provider)
+    ## Check if user defined fields
+    if fields:
 
-    ## Convert the fields into a list and remove duplicates
-    fields = list(set(fields))
+        ## Get list of fields available
+        available_fields = __fields(provider = provider)
 
-    ## Make sure the selected list of fields is valid
-    for field in fields:
-        assert any(field in i for i in available_fields) == True
+        ## Convert the fields into a list and remove duplicates
+        fields = list(set(fields))
+
+        ## Make sure the selected list of fields is valid
+        for field in fields:
+            assert any(field in i for i in available_fields) == True
+
+        ## If the user didn't select the 'ip' field, push it to the fields list
+        if 'ip' not in fields:
+            fields.insert(0, 'ip')
 
     ## Debugging
     log.info(f'TwoIP {provider} CLI lookup - Output format set to {output}')
@@ -333,9 +340,15 @@ def cli(
 
     ## Print the results in the requested format
     if output == 'table':
-        print(results.to_table(fields))
+        if fields:
+            print(results.to_table(fields))
+        else:
+            print(results.to_table())
     elif output == 'csv':
-        print(results.to_csv(fields))
+        if fields:
+            print(results.to_csv(fields))
+        else:
+            print(results.to_csv())
     else:
         log.fatal(f'Output type {output} has not been defined')
 
