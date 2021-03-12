@@ -92,14 +92,6 @@ def __load_key(file: TextIO) -> str:
         log.warn(f'No API key could be retrieved from file "{file.name}"; maybe it is empty')
         raise ValueError(f'No API key could be retrieved from file "{file.name}"')
 
-def __version(ctx, param, value):
-    """Print the version of the TwoIP module and exit
-    """
-    if not value or ctx.resilient_parsing:
-        return
-    click.echo(f'TwoIP Version {__version__}')
-    ctx.exit()
-
 # Validator for IP's
 class IPParamType(click.ParamType):
     """IP parameter validator
@@ -124,17 +116,15 @@ class IPParamType(click.ParamType):
             # Return the IP address object
             return address
 
-# Set validator function for click
-IPADDRESS = IPParamType()
 
 # Get command line arguments/options
 # Allow use of --help and -h for click
 @click.command(context_settings = dict(help_option_names=['-h', '--help']))
 @click.argument(
     'ip',
-    nargs       =   -1,
-    required    =   True,
-    type        =   IPADDRESS,
+    nargs           = -1,
+    required        = True,
+    type            = IPParamType(),
 )
 @click.option(
     '-c', '--connections', 'connections',
@@ -142,6 +132,13 @@ IPADDRESS = IPParamType()
     help            = 'Maximum number of HTTP connections to open to API',
     show_default    = True,
     type            = click.IntRange(1, 100, clamp = True),
+)
+@click.option(
+    '-f', '--fields', 'fields',
+    help            = 'The list of fields to output',
+    type            = click.Choice(['table','csv'], case_sensitive = False),
+    required        = False,
+    multiple        = True,
 )
 @click.option(
     '-h2', '--http2', 'http2',
@@ -153,15 +150,15 @@ IPADDRESS = IPParamType()
 )
 @click.option(
     '-k', '--key', 'key',
-    help        =   'The optional API key for 2ip.me',
-    type        =   str,
-    required    =   False,
+    help            = 'The optional API key for 2ip.me',
+    type            = str,
+    required        = False,
 )
 @click.option(
     '-kf', '--keyfile', 'keyfile',
-    help        =   'The optional API key file for 2ip.me',
-    type        =   click.File(mode = 'r'),
-    required    =   False,
+    help            = 'The optional API key file for 2ip.me',
+    type            = click.File(mode = 'r'),
+    required        = False,
 )
 @click.option(
     '-o', '--output', 'output',
@@ -184,20 +181,14 @@ IPADDRESS = IPParamType()
     help            = 'The lookup provider/type (geo for geographic information or provider for provider information)',
     show_default    = True,
     type            = click.Choice(['geo','provider'], case_sensitive = False),
-)
-@click.option(
-    '-V', '--version',
-    is_flag         = True,
-    callback        = __version,
-    expose_value    = False,
     is_eager        = True,
-    help            = 'Print version and exit',
 )
 @click.option(
     '-v', '--verbose', 'verbosity',
-    count       =   True,
-    help        =   'Set output verbosity level - specify multiple times for further debugging',
+    count           =   True,
+    help            = 'Set output verbosity level - specify multiple times for further debugging',
 )
+@click.version_option()
 
 # Execute CLI
 def cli(
