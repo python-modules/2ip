@@ -54,7 +54,7 @@ class Provider(Base):
         ## Return the headers
         return headers
 
-    def to_table(self, fields: List[str] = ['ip', 'autonomous_system', 'name', 'website']) -> str:
+    def to_table(self, fields: List[str] = ['ip', 'success_icon', 'autonomous_system', 'name', 'website']) -> str:
         """Format multiple provider lookup results into a table
 
         Args:
@@ -74,7 +74,7 @@ class Provider(Base):
         ## Generate and return table
         return tabulate(tabular_data = data, headers = headers, tablefmt = 'pretty')
 
-    def to_csv(self, fields: List[str] = ['ip', 'autonomous_system', 'name', 'website'], delimiter: str = ',') -> str:
+    def to_csv(self, fields: List[str] = ['ip', 'success', 'autonomous_system', 'name', 'website'], delimiter: str = ',') -> str:
         """Format multiple provider lookup results into a CSV
 
         Args:

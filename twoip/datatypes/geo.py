@@ -56,7 +56,7 @@ class Geo(Base):
         ## Return the headers
         return headers
 
-    def to_table(self, fields: List[str] = ['ip', 'city', 'country']) -> str:
+    def to_table(self, fields: List[str] = ['ip', 'success_icon', 'city', 'country']) -> str:
         """Format multiple geo lookup results into a table
 
         Args:
@@ -76,7 +76,7 @@ class Geo(Base):
         ## Generate and return table
         return tabulate(tabular_data = data, headers = headers, tablefmt = 'pretty')
 
-    def to_csv(self, fields: List[str] = ['ip', 'city', 'country'], delimiter: str = ',') -> str:
+    def to_csv(self, fields: List[str] = ['ip', 'success', 'city', 'country'], delimiter: str = ',') -> str:
         """Format multiple geo lookup results into a CSV
 
         Args:

@@ -95,8 +95,11 @@ class ProviderResult(BaseResult):
         if self.http_code == 200 and not self.error:
             self.success = True,
             self.success_icon = '✔'
+        elif not self.http_code:
+            self.success = False,
+            self.success_icon = '❔'
         else:
-            self.success = True,
+            self.success = False,
             self.success_icon = '✖'
 
         ## Ensure the route and length is available

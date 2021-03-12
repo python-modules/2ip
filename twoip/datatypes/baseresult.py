@@ -44,7 +44,7 @@ class BaseResult(object):
         default = None,
         compare = False,
         metadata = {
-            'title'         : 'Error',
+            'title'         : 'Error Message',
             'description'   : 'The error message/information if the geo lookup failed',
         },
     )
@@ -77,8 +77,11 @@ class BaseResult(object):
         if self.http_code == 200 and not self.error:
             self.success = True,
             self.success_icon = '✔'
+        elif not self.http_code:
+            self.success = False,
+            self.success_icon = '❔'
         else:
-            self.success = True,
+            self.success = False,
             self.success_icon = '✖'
 
     def get_meta(self, field: str, name: str) -> str:
@@ -181,7 +184,7 @@ class BaseResult(object):
         else:
             return is_private
 
-    def fields(self) -> List[Tuple(str, str)]:
+    def fields(self) -> List[Tuple]:
         """Return a list of available fields and their titles
 
         Returns:
