@@ -15,13 +15,20 @@ from .logger import Logger
 from .twoip import TwoIP
 
 from .datatypes.geo import Geo
+from .datatypes.georesult import GeoResult
 from .datatypes.provider import Provider
+from .datatypes.providerresult import ProviderResult
 
 # Import version info
 from .__version__ import __version__
 
 # Get logger
 log = logging.getLogger('twoip')
+
+# Generate sample GeoResult and ProviderResult (used for retrieving available fields
+SAMPLE_IP = IPv4Address('192.0.2.0')
+SAMPLE_GEO = GeoResult(ipaddress = SAMPLE_IP)
+SAMPLE_PROVIDER = ProviderResult(ipaddress = SAMPLE_IP)
 
 def __key(key: str = None, keyfile: TextIO = None) -> Union[str, None]:
     """If API key and/or keyfile defined, pick one and return the API key
@@ -92,6 +99,61 @@ def __load_key(file: TextIO) -> str:
         log.warn(f'No API key could be retrieved from file "{file.name}"; maybe it is empty')
         raise ValueError(f'No API key could be retrieved from file "{file.name}"')
 
+def __fields(provider: Literal['geo','provider'] = 'geo') -> List[Tuple]:
+    """Retrieve a list of available fields for output
+
+    Arguments:
+        provider (Literal['geo','provider']): The provider type
+
+    Returns:
+        List[Tuple]: A list of fields in the format ('name','title')
+    """
+    ## Retrieve fields from the sample object
+    if provider == 'geo':
+        fields = SAMPLE_GEO.fields()
+    elif provider == 'provider':
+        fields = SAMPLE_PROVIDER.fields()
+    else:
+        fields = ()
+
+    return fields
+
+def __fields_autocomplete(ctx, args, incomplete):
+    """Allow autocomplete for field names
+    """
+    ## Get the provider name from current context
+    if 'provider' in ctx.params and ctx.params['provider']:
+        provider: Literal['geo','provider'] = ctx.params['provider']
+        ## Retrieve fields for provider
+        fields: List[Tuple] = __fields(provider = provider)
+    else:
+        ## No provider name, get default fields
+        fields: List[Tuple] = __fields()
+
+    ## Return autocomplete
+    return [c for c in fields if incomplete in c[0]]
+
+def __fields_validation(ctx, param, value):
+    """Validate the field names
+    """
+    ## Get the provider name from current context
+    if 'provider' in ctx.params and ctx.params['provider']:
+        provider: Literal['geo','provider'] = ctx.params['provider']
+        ## Retrieve fields for provider
+        fields: List[Tuple] = __fields(provider = provider)
+    else:
+        ## No provider name, get default fields
+        fields: List[Tuple] = __fields()
+
+    ## Check if parameter is valid
+    try:
+        if (any(value in i for i in fields)):
+            return value
+        else:
+            raise click.BadParameter('Field does not exist')
+    except Exception as e:
+        raise click.BadParameter(f'Exception looking up available fields: {e}')
+
 # Validator for IP's
 class IPParamType(click.ParamType):
     """IP parameter validator
@@ -116,7 +178,6 @@ class IPParamType(click.ParamType):
             # Return the IP address object
             return address
 
-
 # Get command line arguments/options
 # Allow use of --help and -h for click
 @click.command(context_settings = dict(help_option_names=['-h', '--help']))
@@ -134,11 +195,13 @@ class IPParamType(click.ParamType):
     type            = click.IntRange(1, 100, clamp = True),
 )
 @click.option(
-    '-f', '--fields', 'fields',
-    help            = 'The list of fields to output',
-    type            = click.Choice(['table','csv'], case_sensitive = False),
+    '-f', '--field', 'fields',
+    help            = 'Field to add to output - specify once for each field',
+    type            = click.STRING,
     required        = False,
     multiple        = True,
+    autocompletion  = __fields_autocomplete,
+    #callback        = __fields_validation,
 )
 @click.option(
     '-h2', '--http2', 'http2',
@@ -209,7 +272,7 @@ def cli(
         ## Enable HTTP2
         http2: bool = True,
         ## Output fields
-        fields: Optional[List[str]] = None,
+        fields: Optional[Tuple] = None,
         ## Logging verbosity
         verbosity: int = 0,
     ) -> None:
@@ -221,6 +284,16 @@ def cli(
     ## Check arguments
     assert provider in ['geo','provider']
     assert output in ['table','csv']
+
+    ## Get list of fields available
+    available_fields = __fields(provider = provider)
+
+    ## Convert the fields into a list and remove duplicates
+    fields = list(set(fields))
+
+    ## Make sure the selected list of fields is valid
+    for field in fields:
+        assert any(field in i for i in available_fields) == True
 
     ## Debugging
     log.info(f'TwoIP {provider} CLI lookup - Output format set to {output}')
@@ -260,9 +333,9 @@ def cli(
 
     ## Print the results in the requested format
     if output == 'table':
-        print(results.to_table())
+        print(results.to_table(fields))
     elif output == 'csv':
-        print(results.to_csv())
+        print(results.to_csv(fields))
     else:
         log.fatal(f'Output type {output} has not been defined')
 
