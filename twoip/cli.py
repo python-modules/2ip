@@ -20,6 +20,9 @@ from .datatypes.provider import Provider
 # Get logger
 log = logging.getLogger('twoip')
 
+# Allow use of --help and -h for click
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+
 def __key(key: str = None, keyfile: TextIO = None) -> Union[str, None]:
     """If API key and/or keyfile defined, pick one and return the API key
 
@@ -117,7 +120,7 @@ class IPParamType(click.ParamType):
 IPADDRESS = IPParamType()
 
 # Get command line arguments/options
-@click.command()
+@click.command(context_settings = CONTEXT_SETTINGS)
 @click.argument(
     'ip',
     nargs       =   -1,
