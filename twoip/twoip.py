@@ -3,7 +3,7 @@
 # Import core modules
 import asyncio
 import logging
-from asyncstdlib import lru_cache
+from functools import lru_cache
 from ipaddress import ip_address, IPv4Address, IPv6Address
 from pprint import pformat
 from typing import Optional, Union, Literal, List
@@ -161,9 +161,6 @@ class TwoIP(object):
         else:
             raise RuntimeError(f'Lookup URL generator for type "{lookup_type}" is missing')
 
-        ## Print cache info
-        log.verbose(f'Request cache status:\n{self.__request.cache_info()}')
-
         ## Generate and run the list of tasks
         log.info('Running asyncio function to generate and send API requests')
         results: List[dict] = asyncio.run(self.__generate_tasks(ips = ips, url = url))
@@ -171,9 +168,6 @@ class TwoIP(object):
         ## Parse the results
         log.info('HTTP requests finished, parsing results')
         parsed_results = self.__parse_results(results = results, lookup_type = lookup_type)
-
-        ## Print cache info
-        log.verbose(f'Request cache status:\n{self.__request.cache_info()}')
 
         ## Return the results
         log.info('Finished parsing, returning results')
@@ -449,6 +443,17 @@ class TwoIP(object):
         log.verbose(f'Generated API URL: {url}')
         return url
 
+    @staticmethod
+    @lru_cache(maxsize = 10000)
+    def __generate_params(key: Optional[str], ip: Union[IPv4Address, IPv6Address]) -> str:
+        ## Create params for the HTTP request
+        log.debug(f'Generating URL params for IP "{ip}"')
+        if key:
+            params = urlparse.urlencode({'key': key, 'ip': f'{ip}'})
+        else:
+            params = urlparse.urlencode({'ip': f'{ip}'})
+        log.trace(f'Generated params: {params}')
+
     async def __generate_tasks(self, ips: List[Union[IPv4Address, IPv6Address]], url: str) -> List[dict]:
         """Generate and execute a list of tasks (lookups)
 
@@ -471,13 +476,8 @@ class TwoIP(object):
         ## Loop over each IP
         for ip in ips:
 
-            ## Create params for the HTTP request
-            log.debug(f'Generating URL params for IP "{ip}"')
-            if self._key:
-                params = urlparse.urlencode({'key': self._key, 'ip': f'{ip}'})
-            else:
-                params = urlparse.urlencode({'ip': f'{ip}'})
-            log.trace(f'Generated params: {params}')
+            ## Generate params from API key and IP
+            params = self.__generate_params(key = self._key, ip = ip)
 
             ## Append task to task list
             log.debug(f'Adding task for IP "{ip}" to tasks list and executing')
@@ -496,7 +496,6 @@ class TwoIP(object):
         return results
 
     @staticmethod
-    @lru_cache(maxsize = 100000)
     async def __request(client: httpx.AsyncClient, url: str, params: str, ip = Union[IPv4Address, IPv6Address]) -> dict:
 
         ## Create dict to store result
