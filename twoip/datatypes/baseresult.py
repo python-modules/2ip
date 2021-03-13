@@ -75,13 +75,13 @@ class BaseResult(object):
 
         ## Check if the HTTP status is 200 and if there is any error; if not the lookup was successful
         if self.http_code == 200 and not self.error:
-            self.success = True,
+            self.success = True
             self.success_icon = '✔'
         elif not self.http_code:
-            self.success = False,
+            self.success = False
             self.success_icon = '❔'
         else:
-            self.success = False,
+            self.success = False
             self.success_icon = '✖'
 
     def get_meta(self, field: str, name: str) -> str:

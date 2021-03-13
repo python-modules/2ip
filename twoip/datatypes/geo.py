@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Literal
 
 # Requirements for generating output (CSV or table)
-from csv import writer as csvwriter, QUOTE_NONNUMERIC
 from ipaddress import IPv4Address
-from io import StringIO
-from tabulate import tabulate
 
 from .base import Base
 from .georesult import GeoResult
@@ -36,68 +33,27 @@ class Geo(Base):
         """
         return self.to_table()
 
-    def __generate_headers(self, fields: List[str]) -> list:
-        """Generate headers from a list of fields
+    @staticmethod
+    def _sample() -> GeoResult:
+        """Generate a sample GeoResult object
 
-        Args:
-            fields (List[str]): The list of fields to output
-
-        Returns:
-            list: The list of header data
-
-        Examples:
-        """
-        ## Create a sample GeoResult object
-        sample = GeoResult(ipaddress = IPv4Address('192.0.2.0'))
-
-        ## Retrieve headers
-        headers = self.headers(sample = sample, fields = fields)
-
-        ## Return the headers
-        return headers
-
-    def to_table(self, fields: List[str] = ['ip', 'success_icon', 'city', 'country']) -> str:
-        """Format multiple geo lookup results into a table
-
-        Args:
-            fields (List[str], optional): The list of fields to output. Defaults to ['ip', 'city', 'country'].
+        This is used to retrieve table headers and other information.
 
         Returns:
-            str: The formatted table
-
-        Examples:
+            GeoResult: The sample GeoResult object
         """
-        ## Retrieve headers for table
-        headers = self.__generate_headers(fields = fields)
+        return GeoResult(ipaddress = IPv4Address('192.0.2.0'))
 
-        ## Retrieve the data
-        data = self.retrieve_data(fields = fields)
+    @staticmethod
+    def _default_fields(format: Literal['table','csv']) -> List[str]:
+        """Return a list of default fields to retrieve when generating output
 
-        ## Generate and return table
-        return tabulate(tabular_data = data, headers = headers, tablefmt = 'pretty')
-
-    def to_csv(self, fields: List[str] = ['ip', 'success', 'city', 'country'], delimiter: str = ',') -> str:
-        """Format multiple geo lookup results into a CSV
-
-        Args:
-            fields (List[str], optional): The list of fields to output. Defaults to ['ip', 'city', 'country'].
-            delimiter (str, optional): The field delimiter. Defaults to ','.
+        The 'ip' field is always excluded as that will be printed by default
 
         Returns:
-            str: The CSV
-
-        Examples:
+            List[str]: The list of default fields to output
         """
-        ## Create header row
-        headers = self.__generate_headers(fields = fields)
-
-        ## Retrieve the data
-        data = self.retrieve_data(fields = fields)
-
-        ## Generate the CSV
-        output = StringIO()
-        writer = csvwriter(headers + data, quoting = QUOTE_NONNUMERIC, delimiter = delimiter)
-        writer.writerows(data)
-
-        ## Return the CSV
-        return output.getvalue()
+        if format == 'table':
+            return ['success_icon', 'city', 'country']
+        else:
+            return ['success', 'city', 'country']

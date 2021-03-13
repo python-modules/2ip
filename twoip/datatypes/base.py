@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional, Literal
+
+# Requirements for generating output (CSV or table)
+from csv import writer as csvwriter, QUOTE_NONNUMERIC
+from io import StringIO
+from tabulate import tabulate
 
 @dataclass(frozen = False)
 class Base(object):
@@ -56,7 +61,7 @@ class Base(object):
         ## Return results
         return result_dict
 
-    def retrieve_data(self, fields: List[str]) -> list:
+    def __retrieve_data(self, fields: List[str]) -> list:
         """Loop over each result and retrieve the requested attributes/fields
 
         Args:
@@ -88,6 +93,7 @@ class Base(object):
 
             ## Get each requested field, format as string and add to result data
             for field in fields:
+                print(getattr(result, field))
                 result_data.append(f'{getattr(result, field)}')
 
             ## Add the fields to the table data
@@ -96,8 +102,7 @@ class Base(object):
         ## Return the generated data
         return data
 
-    @staticmethod
-    def headers(sample: object, fields: List[str]) -> list:
+    def __headers(self, fields: List[str]) -> list:
         """Generate table/CSV headers from a list of fields
 
         Args:
@@ -116,6 +121,9 @@ class Base(object):
             >>> Geo.headers(sample = sample, fields = ['ip', 'country'])
             ['IP Address', 'Country']
         """
+        ## Generate sample object
+        sample = self._sample()
+
         ## Create dict to store table headers
         headers = []
 
@@ -137,3 +145,70 @@ class Base(object):
 
         ## Return the headers
         return headers
+
+    def __parse_fields(self, format: Literal['table','csv'], fields: Optional[List[str]] = None) -> List[str]:
+        ## If no fields were provided, use the default fields
+        if not fields:
+            fields = self._default_fields(format = format)
+
+        ## Insert the IP field to the start
+        if 'ip' in fields:
+            fields.insert(0, fields.pop(fields.index('ip')))
+        else:
+            fields.insert(0, 'ip')
+
+        ## Return parsed/generated fields
+        return fields
+
+    def to_table(self, fields: Optional[List[str]] = None) -> str:
+        """Format multiple geo or provider lookup results into a table
+
+        Args:
+            fields (List[str], optional): The list of fields to output
+
+        Returns:
+            str: The formatted table
+
+        Examples:
+        """
+        ## Parse fields list or generate default fields if not specified
+        fields = self.__parse_fields(format = 'table', fields = fields)
+
+        ## Retrieve headers for table
+        headers = self.__headers(fields = fields)
+
+        ## Parse fields list or generate default fields if not specified
+        data = self.__retrieve_data(fields = fields)
+
+        ## Generate and return table
+        return tabulate(tabular_data = data, headers = headers, tablefmt = 'pretty')
+
+    def to_csv(self, fields: Optional[List[str]] = None, delimiter: str = ',') -> str:
+        """Format multiple geo lookup results into a CSV
+
+        Args:
+            fields (List[str], optional): The list of fields to output. Defaults to ['ip', 'city', 'country'].
+            delimiter (str, optional): The field delimiter. Defaults to ','.
+
+        Returns:
+            str: The CSV
+
+        Examples:
+        """
+        ## Parse fields list or generate default fields if not specified
+        fields = self.__parse_fields(format = 'csv', fields = fields)
+
+        ## Retrieve headers for table
+        headers = [self.__headers(fields = fields)]
+
+        ## Retrieve the data
+        data = self.__retrieve_data(fields = fields)
+
+        ## Generate the CSV
+        output = StringIO()
+        writer = csvwriter(output, quoting = QUOTE_NONNUMERIC, delimiter = delimiter)
+        writer.writerows(headers)
+        writer.writerows(data)
+
+        ## Return the CSV
+        return output.getvalue()
