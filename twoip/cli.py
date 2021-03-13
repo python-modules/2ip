@@ -9,6 +9,7 @@ import click
 import logging
 from ipaddress import IPv4Address, IPv6Address, ip_address
 from typing import TextIO, Tuple, Optional, Literal, Union, List
+from urllib import parse as urlparse
 
 # Import local modules
 from .logger import Logger
@@ -24,6 +25,9 @@ from .__version__ import __version__
 
 # Get logger
 log = logging.getLogger('twoip')
+
+# Base API url
+API = 'https://api.2ip.ua'
 
 # Generate sample GeoResult and ProviderResult (used for retrieving available fields
 SAMPLE_IP = IPv4Address('192.0.2.0')
@@ -133,26 +137,24 @@ def __fields_autocomplete(ctx, args, incomplete):
     ## Return autocomplete
     return [c for c in fields if incomplete in c[0]]
 
-def __fields_validation(ctx, param, value):
-    """Validate the field names
+# Validator for URL's
+def __validate_url(ctx, param, value):
+    """Validate the API URL parameter
     """
-    ## Get the provider name from current context
-    if 'provider' in ctx.params and ctx.params['provider']:
-        provider: Literal['geo','provider'] = ctx.params['provider']
-        ## Retrieve fields for provider
-        fields: List[Tuple] = __fields(provider = provider)
-    else:
-        ## No provider name, get default fields
-        fields: List[Tuple] = __fields()
-
-    ## Check if parameter is valid
+    ## Try to parse with urlparse
     try:
-        if (any(value in i for i in fields)):
-            return value
+        url = urlparse.urlparse(value)
+    except Exception:
+        raise click.BadParameter('Could not parse URL')
+
+    ## Valdate required parts are available
+    if all([url.scheme, url.netloc]):
+        if url.path:
+            return f'{url.scheme}://{url.netloc}{url.path}'
         else:
-            raise click.BadParameter('Field does not exist')
-    except Exception as e:
-        raise click.BadParameter(f'Exception looking up available fields: {e}')
+            return f'{url.scheme}://{url.netloc}'
+    else:
+        raise click.BadParameter('URL is not correctly formed')
 
 # Validator for IP's
 class IPParamType(click.ParamType):
@@ -201,7 +203,6 @@ class IPParamType(click.ParamType):
     required        = False,
     multiple        = True,
     autocompletion  = __fields_autocomplete,
-    #callback        = __fields_validation,
 )
 @click.option(
     '-h2', '--http2', 'http2',
@@ -247,6 +248,14 @@ class IPParamType(click.ParamType):
     is_eager        = True,
 )
 @click.option(
+    '-u', '--url', 'url',
+    default         = API,
+    help            = 'The base API URL',
+    show_default    = True,
+    type            = click.STRING,
+    callback        = __validate_url,
+)
+@click.option(
     '-v', '--verbose', 'verbosity',
     count           =   True,
     help            = 'Set output verbosity level - specify multiple times for further debugging',
@@ -273,6 +282,8 @@ def cli(
         http2: bool = True,
         ## Output fields
         fields: Optional[Tuple] = None,
+        ## API URL
+        url: str = API,
         ## Logging verbosity
         verbosity: int = 0,
     ) -> None:
@@ -292,21 +303,17 @@ def cli(
         available_fields = __fields(provider = provider)
 
         ## Convert the fields into a list and remove duplicates
-        fields = list(set(fields))
+        fields = list(dict.fromkeys(fields))
 
         ## Make sure the selected list of fields is valid
         for field in fields:
             assert any(field in i for i in available_fields) == True
 
-        ## If the user didn't select the 'ip' field, push it to the fields list
-        if 'ip' not in fields:
-            fields.insert(0, 'ip')
-
     ## Debugging
     log.info(f'TwoIP {provider} CLI lookup - Output format set to {output}')
 
     ## Remove any duplicate IP's and convert to list (from a tuple)
-    ip: List[Union[IPv4Address, IPv6Address]] = list(set(ip))
+    ip: List[Union[IPv4Address, IPv6Address]] = list(dict.fromkeys(ip))
 
     ## Get the API key if specified
     if key or keyfile:
@@ -322,6 +329,7 @@ def cli(
         strict = strict,
         connections = connections,
         http2 = http2,
+        url = url,
     )
 
     ## Debugging
@@ -340,15 +348,9 @@ def cli(
 
     ## Print the results in the requested format
     if output == 'table':
-        if fields:
-            print(results.to_table(fields))
-        else:
-            print(results.to_table())
+        print(results.to_table(fields))
     elif output == 'csv':
-        if fields:
-            print(results.to_csv(fields))
-        else:
-            print(results.to_csv())
+        print(results.to_csv(fields))
     else:
         log.fatal(f'Output type {output} has not been defined')
 
