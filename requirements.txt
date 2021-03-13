@@ -1,3 +1,4 @@
-httpx[http2]
+asyncstdlib
 click
+httpx[http2]
 tabulate

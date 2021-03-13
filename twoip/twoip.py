@@ -3,7 +3,7 @@
 # Import core modules
 import asyncio
 import logging
-from functools import lru_cache
+from asyncstdlib import lru_cache
 from ipaddress import ip_address, IPv4Address, IPv6Address
 from pprint import pformat
 from typing import Optional, Union, Literal, List

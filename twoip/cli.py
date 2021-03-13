@@ -329,7 +329,7 @@ def cli(
         strict = strict,
         connections = connections,
         http2 = http2,
-        url = url,
+        api = url,
     )
 
     ## Debugging

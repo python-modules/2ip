@@ -93,7 +93,6 @@ class Base(object):
 
             ## Get each requested field, format as string and add to result data
             for field in fields:
-                print(getattr(result, field))
                 result_data.append(f'{getattr(result, field)}')
 
             ## Add the fields to the table data
