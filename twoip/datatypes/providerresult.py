@@ -34,6 +34,7 @@ class ProviderResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
+            'title'         : 'Website',
             'description'   : 'The provider website',
         },
     )
@@ -41,6 +42,7 @@ class ProviderResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
+            'title'         : 'ASN',
             'description'   : 'The provider autonomous system number',
         },
     )
@@ -48,6 +50,7 @@ class ProviderResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
+            'title'         : 'IP Range Start',
             'description'   : 'The first IP address of the providers IP range',
         },
     )
@@ -55,6 +58,7 @@ class ProviderResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
+            'title'         : 'IP Range End',
             'description'   : 'The last IP address of the providers IP range',
         },
     )
@@ -62,6 +66,7 @@ class ProviderResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
+            'title'         : 'Route',
             'description'   : 'The network address for the providers IP range',
         },
     )
@@ -69,6 +74,7 @@ class ProviderResult(BaseResult):
         default = None,
         compare = False,
         metadata = {
+            'title'         : 'Prefix Length',
             'description'   : 'The prefix length for the providers IP range',
         },
     )
@@ -76,6 +82,7 @@ class ProviderResult(BaseResult):
         init = False,
         compare = False,
         metadata = {
+            'title'         : 'Prefix',
             'description'   : 'The providers IP range and prefix length represented as a IPv4Network or IPv6Network object',
         },
     )
