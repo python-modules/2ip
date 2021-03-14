@@ -5,7 +5,7 @@ from datetime import timedelta
 from httpx import Response, Cookies, Headers
 from ipaddress import IPv4Address, IPv6Address
 from json.decoder import JSONDecodeError
-from typing import Union, List, Dict
+from typing import Union, List, Dict, Optional
 
 @dataclass
 class APIResponse(object):
@@ -19,10 +19,26 @@ class APIResponse(object):
             'description'   : 'The IP address that was looked up represented as an ipaddress object',
         },
     )
-    response: InitVar[Response] = field(
+    url: str = field(
+        compare = False,
+        metadata = {
+            'title'         : 'URL',
+            'description'   : 'The URL the request was made to',
+        },
+    )
+    response: InitVar[Optional[Response]] = field(
+        default = None,
         compare = False,
         metadata = {
             'description'   : 'The httpx response object',
+        },
+    )
+    error: Optional[str] = field(
+        default = None,
+        compare = False,
+        metadata = {
+            'title'         : 'Error',
+            'description'   : 'httpx error while making request',
         },
     )
 
@@ -99,14 +115,6 @@ class APIResponse(object):
             'description'   : 'The HTTP code from the response',
         },
     )
-    url: str = field(
-        init = False,
-        compare = False,
-        metadata = {
-            'title'         : 'URL',
-            'description'   : 'The URL the request was made to',
-        },
-    )
     json: Union[dict, None] = field(
         init = False,
         compare = False,
@@ -124,23 +132,23 @@ class APIResponse(object):
         },
     )
 
-    def __post_init__(self, response: Response) -> object:
+    def __post_init__(self, response: Union[Response, None]) -> object:
         """Break out the attributes from the response object
         """
-        ## Create list of attributes that can be handled without any special parsing/handling
-        attributes: List[str] = ['content', 'cookies', 'elapsed', 'headers', 'http_version', 'is_error', 'is_redirect', 'status_code', 'text']
-
-        ## Set the attributes from unparsed list
-        self.__set_attributes_unparsed(attributes = attributes, response = response)
-
         ## Set the IP
         self.ip = f'{self.ipaddress}'
 
-        ## Set the URL
-        self.url = f'{response.url}'
+        ## Make sure there is a response
+        if response:
 
-        ## Try and parse response as JSON
-        self.json = self.__parse_json(response = response)
+            ## Create list of attributes that can be handled without any special parsing/handling
+            attributes: List[str] = ['content', 'cookies', 'elapsed', 'headers', 'http_version', 'is_error', 'is_redirect', 'status_code', 'text']
+
+            ## Set the attributes from unparsed list
+            self.__set_attributes_unparsed(attributes = attributes, response = response)
+
+            ## Try and parse response as JSON
+            self.json = self.__parse_json(response = response)
 
     def __set_attributes_unparsed(self, attributes: List[str], response: Response) -> None:
         """Set attributes that do not require any special parsing
