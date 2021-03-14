@@ -1,0 +1,185 @@
+# -*- coding: utf-8 -*-
+
+from dataclasses import dataclass, field, InitVar
+from datetime import timedelta
+from httpx import Response, Cookies, Headers
+from ipaddress import IPv4Address, IPv6Address
+from json.decoder import JSONDecodeError
+from typing import Union, List, Dict
+
+@dataclass
+class APIResponse(object):
+    """Dataclass used to store the results of an API lookup for further parsing
+    """
+
+    ## Assign the fields that should be passed to this dataclass
+    ipaddress: Union[IPv4Address, IPv6Address] = field(
+        compare = True,
+        metadata = {
+            'description'   : 'The IP address that was looked up represented as an ipaddress object',
+        },
+    )
+    response: InitVar[Response] = field(
+        compare = False,
+        metadata = {
+            'description'   : 'The httpx response object',
+        },
+    )
+
+    ## Assign all other fields which are generated after initialization
+    ip: str = field(
+        init = False,
+        compare = False,
+        metadata = {
+            'title'         : 'IP Address',
+            'description'   : 'The IP address that was looked up represented as a string',
+        },
+    )
+    content: bytes = field(
+        init = False,
+        compare = False,
+        metadata = {
+            'title'         : 'Content',
+            'description'   : 'The raw response content as bytes',
+        },
+    )
+    cookies: Cookies = field(
+        init = False,
+        compare = False,
+        metadata = {
+            'title'         : 'Cookies',
+            'description'   : 'Any cookies from the response',
+        },
+    )
+    elapsed: timedelta = field(
+        init = False,
+        compare = False,
+        metadata = {
+            'title'         : 'Elapsed',
+            'description'   : 'The amount of time elapsed for the request',
+        },
+    )
+    headers: Headers = field(
+        init = False,
+        compare = False,
+        metadata = {
+            'title'         : 'headers',
+            'description'   : 'The response headers',
+        },
+    )
+    http_version: str = field(
+        init = False,
+        compare = False,
+        metadata = {
+            'title'         : 'HTTP Version',
+            'description'   : 'The HTTP version used for the request',
+        },
+    )
+    is_error: bool = field(
+        init = False,
+        compare = False,
+        metadata = {
+            'title'         : 'Error',
+            'description'   : 'If the request returned an error',
+        },
+    )
+    is_redirect: bool = field(
+        init = False,
+        compare = False,
+        metadata = {
+            'title'         : 'Redirect',
+            'description'   : 'If the request resuled in a redirect',
+        },
+    )
+    status_code: int = field(
+        init = False,
+        compare = False,
+        metadata = {
+            'title'         : 'HTTP code',
+            'description'   : 'The HTTP code from the response',
+        },
+    )
+    url: str = field(
+        init = False,
+        compare = False,
+        metadata = {
+            'title'         : 'URL',
+            'description'   : 'The URL the request was made to',
+        },
+    )
+    json: Union[dict, None] = field(
+        init = False,
+        compare = False,
+        metadata = {
+            'title'         : 'JSON',
+            'description'   : 'The response parsed as JSON (into a dict)',
+        },
+    )
+    text: str = field(
+        init = False,
+        compare = False,
+        metadata = {
+            'title'         : 'Text',
+            'description'   : 'The response as text',
+        },
+    )
+
+    def __post_init__(self, response: Response) -> object:
+        """Break out the attributes from the response object
+        """
+        ## Create list of attributes that can be handled without any special parsing/handling
+        attributes: List[str] = ['content', 'cookies', 'elapsed', 'headers', 'http_version', 'is_error', 'is_redirect', 'status_code', 'text']
+
+        ## Set the attributes from unparsed list
+        self.__set_attributes_unparsed(attributes = attributes, response = response)
+
+        ## Set the IP
+        self.ip = f'{self.ipaddress}'
+
+        ## Set the URL
+        self.url = f'{response.url}'
+
+        ## Try and parse response as JSON
+        self.json = self.__parse_json(response = response)
+
+    def __set_attributes_unparsed(self, attributes: List[str], response: Response) -> None:
+        """Set attributes that do not require any special parsing
+
+        If the attribute cannot be set it will be set to 'None'
+
+        Raises:
+            RunTimeError: Unhandled exception getting attribute
+        """
+        ## Loop over each attribute name
+        for attribute in attributes:
+
+            ## Try getting attribute, if it does not exist the value will be set to none
+            try:
+                value = getattr(response, attribute)
+            except AttributeError:
+                value = None
+            except Exception as e:
+                raise RuntimeError(f'Exception getting attribute "{attribute}" from API response object: {e}')
+
+            ## Set the attribute
+            setattr(self, attribute, value)
+
+    @staticmethod
+    def __parse_json(response: Response) -> Union[None, Dict]:
+        """Attempt to parse response as JSON and set the self.json attribute to the result
+
+        If the response body cannot be parsed it will be set to None.
+
+        Raises:
+            ValueError: JSON could not be parsed
+        """
+        ## Attempt the parse
+        try:
+            json = response.json()
+        except JSONDecodeError:
+            json = None
+        except Exception as e:
+            raise ValueError(f'Could not parse response as JSON: {e}')
+
+        ## Return the parsed json or None
+        return json
