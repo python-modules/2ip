@@ -120,12 +120,16 @@ def __fields(provider: Literal['geo','provider'] = 'geo') -> List[Tuple]:
     else:
         fields = ()
 
+    ## Remove the 'ip' field as it is always returned
+    fields = [field for field in fields if 'ip' != field[0]]
+
+    ## Return the newly generated tuple
     return fields
 
 def __fields_autocomplete(ctx, args, incomplete):
     """Allow autocomplete for field names
     """
-    ## Get the provider name from current context
+    ## Get the provider name from current context and retrieve the list of fields
     if 'provider' in ctx.params and ctx.params['provider']:
         provider: Literal['geo','provider'] = ctx.params['provider']
         ## Retrieve fields for provider
@@ -133,6 +137,12 @@ def __fields_autocomplete(ctx, args, incomplete):
     else:
         ## No provider name, get default fields
         fields: List[Tuple] = __fields()
+
+    ## Check if any fields have already been defined
+    if ctx.params and ctx.params['fields']:
+
+        ## Filter out any defined fields from the fields list
+        fields = [field for field in fields if field[0] not in ctx.params['fields']]
 
     ## Return autocomplete
     return [c for c in fields if incomplete in c[0]]
