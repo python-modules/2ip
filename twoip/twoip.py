@@ -444,7 +444,6 @@ class TwoIP(object):
         return url
 
     @staticmethod
-    @lru_cache(maxsize = 10000)
     def __generate_params(key: Optional[str], ip: Union[IPv4Address, IPv6Address]) -> str:
         ## Create params for the HTTP request
         log.debug(f'Generating URL params for IP "{ip}"')
@@ -453,6 +452,9 @@ class TwoIP(object):
         else:
             params = urlparse.urlencode({'ip': f'{ip}'})
         log.trace(f'Generated params: {params}')
+
+        ## Return
+        return params
 
     async def __generate_tasks(self, ips: List[Union[IPv4Address, IPv6Address]], url: str) -> List[dict]:
         """Generate and execute a list of tasks (lookups)
