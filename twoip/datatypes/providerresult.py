@@ -38,7 +38,7 @@ class ProviderResult(BaseResult):
             'description'   : 'The provider website',
         },
     )
-    autonomous_system: Optional[int] = field(
+    asn: Optional[int] = field(
         default = None,
         compare = False,
         metadata = {
@@ -90,7 +90,7 @@ class ProviderResult(BaseResult):
     def __post_init__(self) -> object:
         """Function that is executed after creating a new ProviderLookupResult object
 
-        This function will currently validate the IP address and generate the prefix value.
+        This function will create the IP string and set the success icon. The prefix will then be generated.
 
         Raises:
             ValueError: IP address cannot be validated
@@ -98,16 +98,8 @@ class ProviderResult(BaseResult):
         ## Convert the ipaddress object to a string and set in the IP field
         self.ip = f'{self.ipaddress}'
 
-        ## Check if the HTTP status is 200 and if there is any error; if not the lookup was successful
-        if self.http_code == 200 and not self.error:
-            self.success = True,
-            self.success_icon = '✔'
-        elif not self.http_code:
-            self.success = False,
-            self.success_icon = '❔'
-        else:
-            self.success = False,
-            self.success_icon = '✖'
+        ## Set the success/success icon values
+        self._init_success()
 
         ## Ensure the route and length is available
         if self.route and self.length:
@@ -139,16 +131,16 @@ class ProviderResult(BaseResult):
         ## Check if there is an error for the IP
         if self.error:
             ## Set default values for AS/name/site to error
-            autonomous_system = 'Error'
+            asn = 'Error'
             name = 'Error'
             site = 'Error'
         else:
             ## Set default values for AS/name/site to 'Unknown' if not defined
             ## This is required as a TypeError will be raised if they are not set
-            if self.autonomous_system:
-                autonomous_system = self.autonomous_system
+            if self.asn:
+                asn = self.asn
             else:
-                autonomous_system = 'Unknown'
+                asn = 'Unknown'
             if self.name:
                 name = self.name
             else:
@@ -162,4 +154,4 @@ class ProviderResult(BaseResult):
         ip = f'{self.ip}'
 
         ## Return the formatted string
-        return f'{ip:40} {autonomous_system:<10} {name:20} {site}'
+        return f'{ip:40} {asn:<10} {name:20} {site}'

@@ -65,25 +65,6 @@ class BaseResult(object):
         },
     )
 
-    def __post_init__(self) -> object:
-        """Function that is executed after creating a new BaseResult object
-
-        Currently this function will create the ip attribute to represent the IP address as a string.
-        """
-        ## Convert the ipaddress object to a string and set in the IP field
-        self.ip = f'{self.ipaddress}'
-
-        ## Check if the HTTP status is 200 and if there is any error; if not the lookup was successful
-        if self.http_code == 200 and not self.error:
-            self.success = True
-            self.success_icon = '✔'
-        elif not self.http_code:
-            self.success = False
-            self.success_icon = '❔'
-        else:
-            self.success = False
-            self.success_icon = '✖'
-
     def get_meta(self, field: str, name: str) -> str:
         """Retrieve metadata for a field
 
@@ -204,3 +185,17 @@ class BaseResult(object):
 
         ## Return list of fields
         return fields
+
+    def _init_success(self) -> None:
+        """Post init access - Set the success icon and success bool
+        """
+        ## Set the appropriate icon depending on the failure/success type
+        if self.http_code == 200 and not self.error:
+            self.success = True,
+            self.success_icon = '✔'
+        elif not self.http_code:
+            self.success = False,
+            self.success_icon = '❔'
+        else:
+            self.success = False,
+            self.success_icon = '✖'

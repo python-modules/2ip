@@ -126,6 +126,17 @@ class GeoResult(BaseResult):
         },
     )
 
+    def __post_init__(self) -> object:
+        """Function that is executed after creating a new GeoLookupResult object
+
+        This function will create the IP string and set the success icon.
+        """
+        ## Convert the ipaddress object to a string and set in the IP field
+        self.ip = f'{self.ipaddress}'
+
+        ## Set the success/success icon values
+        self._init_success()
+
     def __str__(self) -> str:
         """String representation of a single Geo result
 
