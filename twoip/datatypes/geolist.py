@@ -6,12 +6,12 @@ from typing import List, Literal
 # Requirements for generating output (CSV or table)
 from ipaddress import IPv4Address
 
-from .base import Base
-from .providerresult import ProviderResult
+from .baselist import BaseList
+from .georesult import GeoResult
 
 @dataclass(frozen = False)
-class Provider(Base):
-    """Dataclass to store all results from multiple provider lookups
+class GeoList(BaseList):
+    """Dataclass to store all results from multiple geo lookups
 
     Examples:
     """
@@ -19,7 +19,7 @@ class Provider(Base):
     __slots__ = [ 'results' ]
 
     ## Set results type
-    results: List[ProviderResult]
+    results: List[GeoResult]
 
     def __str__(self) -> str:
         """Return a table of results
@@ -28,19 +28,21 @@ class Provider(Base):
 
         Returns:
             str: The results table
+
+        Examples:
         """
         return self.to_table()
 
     @staticmethod
-    def _sample() -> ProviderResult:
-        """Generate a sample ProviderResult object
+    def _sample() -> GeoResult:
+        """Generate a sample GeoResult object
 
         This is used to retrieve table headers and other information.
 
         Returns:
-            ProviderResult: The sample ProviderResult object
+            GeoResult: The sample GeoResult object
         """
-        return ProviderResult(ipaddress = IPv4Address('192.0.2.0'))
+        return GeoResult(ipaddress = IPv4Address('192.0.2.0'))
 
     @staticmethod
     def _default_fields(format: Literal['table','csv']) -> List[str]:
@@ -52,6 +54,6 @@ class Provider(Base):
             List[str]: The list of default fields to output
         """
         if format == 'table':
-            return ['success_icon', 'autonomous_system', 'name', 'website']
+            return ['success_icon', 'city', 'country']
         else:
-            return ['success', 'autonomous_system', 'name', 'website']
+            return ['success', 'city', 'country']

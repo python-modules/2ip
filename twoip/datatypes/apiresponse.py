@@ -154,13 +154,18 @@ class APIResponse(object):
             ## Set the attributes from unparsed list
             self.__set_attributes_unparsed(attributes = attributes, response = response)
 
-            ## Try and parse response as JSON
-            self.json = self.__parse_json(response = response)
+            ## Try and parse response as JSON if there is no error defined
+            if not self.error:
+                self.__parse_response_json(response = response)
 
     def __set_attributes_unparsed(self, attributes: List[str], response: Response) -> None:
         """Set attributes that do not require any special parsing
 
         If the attribute cannot be set it will be set to 'None'
+
+        Arguments:
+            attributes (List[str]): The list of attributes to set
+            response (Response): The response object
 
         Raises:
             RunTimeError: Unhandled exception getting attribute
@@ -179,22 +184,20 @@ class APIResponse(object):
             ## Set the attribute
             setattr(self, attribute, value)
 
-    @staticmethod
-    def __parse_json(response: Response) -> Union[None, Dict]:
-        """Attempt to parse response as JSON and set the self.json attribute to the result
+    def __parse_response_json(self, response: Response) -> None:
+        """Attempt to parse response as JSON
 
-        If the response body cannot be parsed it will be set to None.
+        If the response cannot be parsed the error attribute will be set.
 
-        Raises:
-            ValueError: JSON could not be parsed
+        Arguments:
+            response (Response): The response object
         """
-        ## Attempt the parse
+        ## Try and parse response as JSON
         try:
-            json = response.json()
+            self.json = response.json()
         except JSONDecodeError:
-            json = None
+            self.json = None
+            self.error = 'Could not parse API response as JSON'
         except Exception as e:
-            raise ValueError(f'Could not parse response as JSON: {e}')
-
-        ## Return the parsed json or None
-        return json
+            self.json = None
+            self.error = f'Exception while parsing response as JSON: {e}'

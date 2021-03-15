@@ -9,7 +9,7 @@ from io import StringIO
 from tabulate import tabulate
 
 @dataclass(frozen = False)
-class Base(object):
+class BaseList(object):
     """Base dataclass for multiple lookup results
 
     This dataclass is used for both Geo and Provider lookup result types.

@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Literal
 
 # Requirements for generating output (CSV or table)
 from ipaddress import IPv4Address
 
-from .base import Base
-from .georesult import GeoResult
+from .baselist import BaseList
+from .providerresult import ProviderResult
 
 @dataclass(frozen = False)
-class Geo(Base):
-    """Dataclass to store all results from multiple geo lookups
+class ProviderList(BaseList):
+    """Dataclass to store all results from multiple provider lookups
 
     Examples:
     """
@@ -19,7 +19,7 @@ class Geo(Base):
     __slots__ = [ 'results' ]
 
     ## Set results type
-    results: List[GeoResult]
+    results: List[ProviderResult]
 
     def __str__(self) -> str:
         """Return a table of results
@@ -28,21 +28,19 @@ class Geo(Base):
 
         Returns:
             str: The results table
-
-        Examples:
         """
         return self.to_table()
 
     @staticmethod
-    def _sample() -> GeoResult:
-        """Generate a sample GeoResult object
+    def _sample() -> ProviderResult:
+        """Generate a sample ProviderResult object
 
         This is used to retrieve table headers and other information.
 
         Returns:
-            GeoResult: The sample GeoResult object
+            ProviderResult: The sample ProviderResult object
         """
-        return GeoResult(ipaddress = IPv4Address('192.0.2.0'))
+        return ProviderResult(ipaddress = IPv4Address('192.0.2.0'))
 
     @staticmethod
     def _default_fields(format: Literal['table','csv']) -> List[str]:
@@ -54,6 +52,6 @@ class Geo(Base):
             List[str]: The list of default fields to output
         """
         if format == 'table':
-            return ['success_icon', 'city', 'country']
+            return ['success_icon', 'autonomous_system', 'name', 'website']
         else:
-            return ['success', 'city', 'country']
+            return ['success', 'autonomous_system', 'name', 'website']
