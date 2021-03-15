@@ -17,6 +17,11 @@ from .__version__ import __version__
 # Get logger
 log = logging.getLogger('twoip')
 
+class Parser(object):
+    """
+    Parse 2ip API responses
+    """
+
     def __parse_results(self, results: List[dict], lookup_type: str) -> Union[Geo, Provider]:
 
         ## Logging

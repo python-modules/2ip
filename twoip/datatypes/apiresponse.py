@@ -7,7 +7,7 @@ from ipaddress import IPv4Address, IPv6Address
 from json.decoder import JSONDecodeError
 from typing import Union, List, Dict, Optional
 
-@dataclass
+@dataclass(frozen = False)
 class APIResponse(object):
     """Dataclass used to store the results of an API lookup for further parsing
     """
@@ -24,6 +24,13 @@ class APIResponse(object):
         metadata = {
             'title'         : 'URL',
             'description'   : 'The URL the request was made to',
+        },
+    )
+    params: dict = field(
+        compare = False,
+        metadata = {
+            'title'         : 'Params',
+            'description'   : 'The request parameters',
         },
     )
     response: InitVar[Optional[Response]] = field(
