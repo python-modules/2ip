@@ -12,7 +12,8 @@ from urllib import parse as urlparse
 import httpx
 
 # Import data types to store results
-from twoip.datatypes.apiresponse import APIResponse
+from .datatypes.api import API
+from .datatypes.apiresponse import APIResponse
 from .datatypes.geo import Geo
 from .datatypes.provider import Provider
 
@@ -23,7 +24,7 @@ from .__version__ import __version__
 log = logging.getLogger('twoip')
 
 ## API base URL
-API = 'https://api.2ip.ua'
+URL_API = 'https://api.2ip.ua'
 ## API URI's
 URI_GEO = 'geo.json'
 URI_PROVIDER = 'provider.json'
@@ -37,7 +38,7 @@ class TwoIP(object):
         ## Optional API key
         key: Optional[str] = None,
         ## The API base URL
-        api: str = API,
+        api: str = URL_API,
         ## The maximum number of concurrent API HTTP connections allowed
         connections: int = 10,
         ## Allow the use of HTTP2 (requiring the h2 module to be installed)
@@ -161,15 +162,34 @@ class TwoIP(object):
 
         ## Generate and run the list of tasks
         log.info('Running asyncio function to generate and send API requests')
-        results: List[dict] = asyncio.run(self.__generate_tasks(ips = ips, url = url))
+        responses = asyncio.run(self.__generate_tasks(ips = ips, url = url))
 
         ## Parse the results
         log.info('HTTP requests finished, parsing results')
-        parsed_results = self.__parse_results(results = results, lookup_type = lookup_type)
+
+        ## Create the parser object
+        parser = Parser(lookup_type = lookup_type)
+
+        ## Create the list to store parsed results
+        parsed = []
+
+        ## Loop over each API result
+        for response in responses:
+
+            ## Parse the result and add to the appropriate object
+            parsed.append(parser(response = response))
+
+        ## Create the geo/provider object and store parsed results
+        if lookup_type == 'geo':
+            results = Geo(results = parsed)
+        elif lookup_type == 'provider':
+            results = Provider(results = parsed)
+        else:
+            raise RuntimeError(f'Object to store results for type "{lookup_type}" is missing')
 
         ## Return the results
         log.info('Finished parsing, returning results')
-        return parsed_results
+        return results
 
     @staticmethod
     def __normalize_ip(ip: List[Union[IPv4Address, IPv6Address, str]], strict: bool) -> List[Union[IPv4Address, IPv6Address]]:
@@ -255,19 +275,19 @@ class TwoIP(object):
         return url
 
     @staticmethod
-    def __generate_params(key: Optional[str], ip: Union[IPv4Address, IPv6Address]) -> str:
+    def __generate_params(key: Optional[str], ip: Union[IPv4Address, IPv6Address]) -> dict:
         ## Create params for the HTTP request
         log.debug(f'Generating URL params for IP "{ip}"')
         if key:
-            params = urlparse.urlencode({'key': key, 'ip': f'{ip}'})
+            params = {'key': key, 'ip': f'{ip}'}
         else:
-            params = urlparse.urlencode({'ip': f'{ip}'})
+            params = {'ip': f'{ip}'}
 
         ## Return
         log.trace(f'Generated params: {params}')
         return params
 
-    async def __generate_tasks(self, ips: List[Union[IPv4Address, IPv6Address]], url: str) -> List[dict]:
+    async def __generate_tasks(self, ips: List[Union[IPv4Address, IPv6Address]], url: str) -> List[APIResponse]:
         """Generate and execute a list of tasks (lookups)
 
         Args:
@@ -290,7 +310,7 @@ class TwoIP(object):
         for ip in ips:
 
             ## Generate params from API key and IP
-            params = self.__generate_params(key = self._key, ip = ip)
+            params: dict = self.__generate_params(key = self._key, ip = ip)
 
             ## Append task to task list
             log.debug(f'Adding task for IP "{ip}" to tasks list and executing')
@@ -298,7 +318,7 @@ class TwoIP(object):
 
         ## Wait for results
         log.debug('Waiting for API requests to finish')
-        results = await asyncio.gather(*tasks)
+        results: Tuple(APIResponse) = await asyncio.gather(*tasks)
 
         ## Close async client
         log.debug('API requests finished, closing HTTP connections')
@@ -309,14 +329,14 @@ class TwoIP(object):
         return results
 
     @staticmethod
-    async def __request(client: httpx.AsyncClient, url: str, params: str, ip = Union[IPv4Address, IPv6Address]) -> APIResponse:
+    async def __request(client: httpx.AsyncClient, url: str, params: dict, ip = Union[IPv4Address, IPv6Address]) -> APIResponse:
 
         ## Logging
-        log.trace(f'Making HTTP request to URL "{url}?{params}" for IP address {ip}')
+        log.trace(f'Making HTTP request to URL "{url}" for IP address "{ip}" with params: {params}')
 
         ## Make the HTTP request
         try:
-            response = await client.get(url = f'{url}?{params}')
+            response = await client.get(url = url, params = params)
         except httpx.RequestError as e:
             log.error(f'RequestError while making API request for IP address {ip}:\n{e}')
             error = f'RequestError: {e}'
@@ -333,7 +353,7 @@ class TwoIP(object):
             error = None
 
         ## Create the APIResponse object
-        apiresponse = APIResponse(ipaddress = ip, url = f'{url}?{params}', error = error, response = response)
+        apiresponse = APIResponse(ipaddress = ip, url = url, params = params, error = error, response = response)
 
         ## Return the result
         return apiresponse
