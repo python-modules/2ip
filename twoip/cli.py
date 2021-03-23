@@ -6,7 +6,7 @@
 
 # Import external modules
 import click
-import logging
+import logging as log
 from ipaddress import IPv4Address, IPv6Address, ip_address
 from typing import TextIO, Tuple, Optional, Literal, Union, List
 from urllib import parse as urlparse
@@ -23,8 +23,8 @@ from .datatypes.providerresult import ProviderResult
 # Import version info
 from .__version__ import __version__
 
-# Get logger
-log = logging.getLogger('twoip')
+# Create logger with default options
+logger = Logger()
 
 # Base API url
 API = 'https://api.2ip.ua'
@@ -195,6 +195,8 @@ class IPParamType(click.ParamType):
 @click.command(context_settings = dict(help_option_names=['-h', '--help']))
 @click.argument(
     'ip',
+    help            = 'The IP address or addresses to lookup',
+    short_help      = 'IP address(es)',
     nargs           = -1,
     required        = True,
     type            = IPParamType(),
@@ -203,12 +205,14 @@ class IPParamType(click.ParamType):
     '-c', '--connections', 'connections',
     default         = 10,
     help            = 'Maximum number of HTTP connections to open to API',
+    short_help      = 'HTTP connections',
     show_default    = True,
     type            = click.IntRange(1, 100, clamp = True),
 )
 @click.option(
     '-f', '--field', 'fields',
     help            = 'Field to add to output - specify once for each field',
+    short_help      = 'Field names',
     type            = click.STRING,
     required        = False,
     multiple        = True,
@@ -218,6 +222,7 @@ class IPParamType(click.ParamType):
     '-h2', '--http2', 'http2',
     default         = True,
     help            = 'Enable HTTP2 support for querying API',
+    short_help      = 'Enable HTTP2',
     show_default    = True,
     type            = bool,
     is_flag         = True,
@@ -225,19 +230,22 @@ class IPParamType(click.ParamType):
 @click.option(
     '-k', '--key', 'key',
     help            = 'The optional API key for 2ip.me',
+    short_help      = 'API key',
     type            = str,
     required        = False,
 )
 @click.option(
     '-kf', '--keyfile', 'keyfile',
     help            = 'The optional API key file for 2ip.me',
+    short_help      = 'API key file',
     type            = click.File(mode = 'r'),
     required        = False,
 )
 @click.option(
     '-o', '--output', 'output',
     default         = 'table',
-    help            = 'The output format',
+    help            = 'The output format. The output may be formatted as table or CSV which you can redirect into a file',
+    short_help      = 'Output format',
     show_default    = True,
     type            = click.Choice(['table','csv'], case_sensitive = False),
 )
@@ -245,6 +253,7 @@ class IPParamType(click.ParamType):
     '-s', '--strict', 'strict',
     default         = False,
     help            = 'Strict mode - any errors will return an exception',
+    short_help      = 'Strict mode',
     show_default    = True,
     type            = bool,
     is_flag         = True,
@@ -253,6 +262,7 @@ class IPParamType(click.ParamType):
     '-t', '--type', 'provider',
     default         = 'geo',
     help            = 'The lookup provider/type (geo for geographic information or provider for provider information)',
+    short_help      = 'Lookup type',
     show_default    = True,
     type            = click.Choice(['geo','provider'], case_sensitive = False),
     is_eager        = True,
@@ -260,7 +270,8 @@ class IPParamType(click.ParamType):
 @click.option(
     '-u', '--url', 'url',
     default         = API,
-    help            = 'The base API URL',
+    help            = 'The base API URL - this should not be changed unless there is a specific reason',
+    short_help      = 'API URL',
     show_default    = True,
     type            = click.STRING,
     callback        = __validate_url,
@@ -269,6 +280,7 @@ class IPParamType(click.ParamType):
     '-v', '--verbose', 'verbosity',
     count           =   True,
     help            = 'Set output verbosity level - specify multiple times for further debugging',
+    short_help      = 'Verbosity level',
 )
 @click.version_option()
 
@@ -299,8 +311,8 @@ def cli(
     ) -> None:
     """Perform 2ip.me lookups for one or more IP addresses
     """
-    ## Setup logging
-    Logger(verbosity = verbosity)
+    ## Set logging verbosity
+    logger.level(verbosity = verbosity)
 
     ## Check arguments
     assert provider in ['geo','provider']
@@ -343,10 +355,8 @@ def cli(
     )
 
     ## Debugging
-    if __debug__ and verbosity >= 5:
-        log.trace('IP address list to lookup:')
-        for address in ip:
-            log.trace(f'{address}')
+    log.trace('IP address list to lookup:')
+    log.trace(f'{ip}')
 
     ## Perform lookups
     if provider == 'geo':
