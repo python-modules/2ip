@@ -11,6 +11,7 @@ import logging
 from sys import exit
 from errno import EINTR
 
+
 class Logger(object):
 
     """
@@ -48,35 +49,36 @@ class Logger(object):
             colorlog = False
 
         ## Configure colorlog if possible, otherwise set up the logging module
-        colorlog_setup = self.__setup(colorlog = colorlog)
+        colorlog_setup = self.__setup(colorlog=colorlog)
 
         ## Add the fatal, trace and verbose log levels and set the handlers
         self.__add_handlers()
 
         ## Set the logging level
-        self.__set_log_level(verbosity = verbosity)
+        self.__set_log_level(verbosity=verbosity)
 
         ## Logging setup completed
-        logging.getLogger('twoip').verbose('Logging initialized')
+        logging.getLogger("twoip").verbose("Logging initialized")
 
         ## Output colorlog info if it would be enabled
         if colorlog == True and colorlog_setup == False:
-            logging.info('Colorlog setup requested but the module could not be loaded; standard logging in use')
+            logging.info(
+                "Colorlog setup requested but the module could not be loaded; standard logging in use"
+            )
 
     def __add_handlers(self) -> None:
-        """Create the levels and handlers for fatal, trace and verbose level logging
-        """
+        """Create the levels and handlers for fatal, trace and verbose level logging"""
         ## Add the trace and verbose levels
-        logging.addLevelName(logging.TRACE, 'TRACE')
-        logging.addLevelName(logging.VERBOSE, 'VERBOSE')
+        logging.addLevelName(logging.TRACE, "TRACE")
+        logging.addLevelName(logging.VERBOSE, "VERBOSE")
 
         ## Set the handlers that will be used to log events at the new levels
-        setattr(logging.getLogger('twoip'), 'fatal', self.__log_fatal)
-        setattr(logging.getLogger('twoip'), 'trace', self.__log_trace)
-        setattr(logging.getLogger('twoip'), 'verbose', self.__log_verbose)
+        setattr(logging.getLogger("twoip"), "fatal", self.__log_fatal)
+        setattr(logging.getLogger("twoip"), "trace", self.__log_trace)
+        setattr(logging.getLogger("twoip"), "verbose", self.__log_verbose)
 
         ## Overwrite the handler for debug level events so that logging can be a noop if not needed
-        setattr(logging.getLogger('twoip'), 'debug', self.__log_debug)
+        setattr(logging.getLogger("twoip"), "debug", self.__log_debug)
 
     @staticmethod
     def __setup(colorlog: bool) -> bool:
@@ -91,21 +93,17 @@ class Logger(object):
             logging.setLogRecordFactory(CustomLogFactory)
             ## Create the output format with debugging info
             log_format = (
-                '{asctime},{msecs:08.4f} - '
-                '{levelname:10} - '
-                '{func_origin:30} - '
-                '{message:>5}'
+                "{asctime},{msecs:08.4f} - "
+                "{levelname:10} - "
+                "{func_origin:30} - "
+                "{message:>5}"
             )
         else:
             ## Use basic output format
-            log_format = (
-                '{asctime} - '
-                '{levelname:10} - '
-                '{message}'
-            )
+            log_format = "{asctime} - " "{levelname:10} - " "{message}"
 
         ## Set date format
-        date_format = '%Y-%m-%d:%H:%M:%S'
+        date_format = "%Y-%m-%d:%H:%M:%S"
 
         ## Check if colorlog should be used
         ## Only attempt to load if not running in optimized mode
@@ -121,19 +119,18 @@ class Logger(object):
         ## Set up logging
         if colorlog_imported:
             formatter = ColoredFormatter(
-                '{log_color}'
-                f'{log_format}',
-                datefmt = date_format,
-                reset = True,
-                style = '{',
-                log_colors = {
-                    'CRITICAL': 'black,bg_red',
-                    'ERROR':    'red',
-                    'WARNING':  'yellow',
-                    'INFO':     'green',
-                    'VERBOSE':  'cyan',
-                    'DEBUG':    'purple',
-                    'TRACE':    'thin_purple',
+                "{log_color}" f"{log_format}",
+                datefmt=date_format,
+                reset=True,
+                style="{",
+                log_colors={
+                    "CRITICAL": "black,bg_red",
+                    "ERROR": "red",
+                    "WARNING": "yellow",
+                    "INFO": "green",
+                    "VERBOSE": "cyan",
+                    "DEBUG": "purple",
+                    "TRACE": "thin_purple",
                 },
             )
             ## Set logging formatter
@@ -143,9 +140,9 @@ class Logger(object):
         else:
             ## Initialize basic logging
             logging.basicConfig(
-                format = f'{log_format}',
-                datefmt = date_format,
-                style = '{',
+                format=f"{log_format}",
+                datefmt=date_format,
+                style="{",
             )
 
         if colorlog_imported:
@@ -154,10 +151,9 @@ class Logger(object):
             return False
 
     def level(self, verbosity: int) -> None:
-        """Set the log level
-        """
+        """Set the log level"""
         ## Call the __set_log_level function
-        self.__set_log_level(verbosity = verbosity)
+        self.__set_log_level(verbosity=verbosity)
 
     @staticmethod
     def __set_log_level(verbosity: int) -> None:
@@ -189,7 +185,8 @@ class Logger(object):
         Args:
             message (str): The message to log
         """
-        if __debug__: logging.log(logging.TRACE, message, stacklevel = stacklevel, *args, **kwargs)
+        if __debug__:
+            logging.log(logging.TRACE, message, stacklevel=stacklevel, *args, **kwargs)
 
     @staticmethod
     def __log_debug(message: str, stacklevel: int = 3, *args, **kwargs) -> None:
@@ -200,7 +197,8 @@ class Logger(object):
         Args:
             message (str): The message to log
         """
-        if __debug__: logging.log(logging.DEBUG, message, stacklevel = stacklevel, *args, **kwargs)
+        if __debug__:
+            logging.log(logging.DEBUG, message, stacklevel=stacklevel, *args, **kwargs)
 
     @staticmethod
     def __log_verbose(message, stacklevel: int = 3, *args, **kwargs) -> None:
@@ -211,26 +209,38 @@ class Logger(object):
         Args:
             message (str): The message to log
         """
-        if __debug__: logging.log(logging.VERBOSE, message, stacklevel = stacklevel, *args, **kwargs)
+        if __debug__:
+            logging.log(
+                logging.VERBOSE, message, stacklevel=stacklevel, *args, **kwargs
+            )
 
     @staticmethod
-    def __log_fatal(message, stacklevel: int = 3, code: int = def_code, *args, **kwargs) -> None:
+    def __log_fatal(
+        message, stacklevel: int = 3, code: int = def_code, *args, **kwargs
+    ) -> None:
         """Log a message at the critical level and exit
 
         Args:
             message (str): The message to log
             code (int): The exit code to use. Defaults to errno.EINTR.
         """
-        logging.critical(message, stacklevel = stacklevel, *args, **kwargs)
+        logging.critical(message, stacklevel=stacklevel, *args, **kwargs)
         ## Log stack info
-        logging.log(logging.DEBUG, f'Exiting with error code {code} due to fatal error', stack_info = True, stacklevel = stacklevel)
+        logging.log(
+            logging.DEBUG,
+            f"Exiting with error code {code} due to fatal error",
+            stack_info=True,
+            stacklevel=stacklevel,
+        )
         exit(code)
+
 
 class CustomLogFactory(logging.LogRecord):
     """Custom logging format settings
 
     If the script is running in optimized mode this will not be used at all.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

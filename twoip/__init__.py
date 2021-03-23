@@ -11,6 +11,7 @@ import logging
 
 # Set default logging handler to avoid "No handler found" warnings.
 from logging import NullHandler
+
 logging.getLogger(__name__).addHandler(NullHandler())
 
 # Import version info
