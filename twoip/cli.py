@@ -7,6 +7,7 @@
 # Import external modules
 import click
 import logging as log
+from clicktypes.network import IPAddressParam
 from ipaddress import IPv4Address, IPv6Address, ip_address
 from typing import TextIO, Tuple, Optional, Literal, Union, List
 from urllib import parse as urlparse
@@ -166,30 +167,6 @@ def __validate_url(ctx, param, value):
     else:
         raise click.BadParameter('URL is not correctly formed')
 
-# Validator for IP's
-class IPParamType(click.ParamType):
-    """IP parameter validator
-
-    This will verify that the IP address provided is a valid IPv4 or IPv6 address.
-    Each address will then be returned as an IPv4Address or IPv6Address object.
-    """
-    name = "ip"
-
-    def convert(self, value: str, param, ctx) -> Union[IPv4Address, IPv6Address]:
-        """Validate and normalize the IP returning the IP address as a string
-        """
-        log.debug(f'Validating IP address "{value}"')
-        try:
-            # Create ip_address object to test IP is valid
-            address: Union[IPv4Address, IPv6Address] = ip_address(value)
-        except ValueError:
-            self.fail(f'{value!r} is not a valid IP address', param, ctx)
-        except Exception as e:
-            self.fail(f'Exception validating IP address "{value!r}": {e}', param, ctx)
-        else:
-            # Return the IP address object
-            return address
-
 # Get command line arguments/options
 # Allow use of --help and -h for click
 @click.command(context_settings = dict(help_option_names=['-h', '--help']))
@@ -199,7 +176,7 @@ class IPParamType(click.ParamType):
     short_help      = 'IP address(es)',
     nargs           = -1,
     required        = True,
-    type            = IPParamType(),
+    type            = IPAddressParam(),
 )
 @click.option(
     '-c', '--connections', 'connections',
