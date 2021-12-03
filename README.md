@@ -20,3 +20,17 @@ Install the module from PyPI:
 ```bash
 python3 -m pip install 2ip
 ```
+
+### Conda
+
+If using [conda](https://docs.conda.io/en/latest/), an `environment.yml` file has been added for convenience. An environment may be created with this command:
+
+```bash
+conda env create -f environment.yml
+```
+
+The environment can then be enabled:
+
+```bash
+conda activate 2ip
+```

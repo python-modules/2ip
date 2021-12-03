@@ -1,0 +1,15 @@
+---
+
+# This environment file may be used with Conda to setup a Python environment suitable for development and use of the 2ip API client.
+
+name: 2ip
+
+# Install packages
+dependencies:
+  - python>=3.9
+  - black
+  - click
+  - httpx[http2]
+  - tabulate
+  - pytest
+  - 'pytest-html'

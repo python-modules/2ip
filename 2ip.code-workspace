@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"editor.tabSize": 4,
+		"cSpell.words": [
+			"Roadmap",
+			"datefmt",
+			"ipaddress",
+			"twoip"
+		],
+		"python.formatting.provider": "black"
+	}
+}
