@@ -1,4 +1,0 @@
-click
-clicktypes
-httpx[http2]
-tabulate
