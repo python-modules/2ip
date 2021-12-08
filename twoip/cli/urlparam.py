@@ -9,6 +9,7 @@ This parameter type will ensure the value provided is a valid URL.
 from click import ParamType
 from urllib import parse
 
+
 class URLParam(ParamType):
     """Validate the parameter is a valid URL
 
@@ -16,7 +17,8 @@ class URLParam(ParamType):
         'https://google.com' will pass validation
         'fsd4g,d' will fail validation
     """
-    name = 'URL'
+
+    name = "URL"
 
     def convert(self, value: str, param, context) -> str:
         """The function which will perform validation or normalization
