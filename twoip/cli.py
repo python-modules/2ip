@@ -8,14 +8,15 @@ TwoIP API Client - CLI
 This file provides the CLI for use with TwoIP.
 """
 
-import logging
 from ipaddress import IPv4Address, IPv6Address
 from typing import Optional, Literal, Union
 
+import logging
 import click
 
 from twoip.__version__ import __version__
 from twoip.__config__ import __api__
+from twoip.log import Log
 from twoip.parameters import IPAddressParam, URLParam
 
 # Generate sample GeoResult and ProviderResult (used for retrieving available fields
@@ -136,6 +137,10 @@ def cli(
     This will execute the API query and output the results in the format
     requested.
     """
+
+    ## Create logger
+    Log(verbosity=verbosity)
+    log = logging.getLogger("twoip")
 
 if __name__ == "__main__":
     cli(auto_envvar_prefix="2IP")
