@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# pylint: disable=too-many-arguments, no-value-for-parameter
+
 """
 TwoIP API Client - CLI
 
@@ -46,36 +48,36 @@ SAMPLE_IP = IPv4Address("192.0.2.0")
 #     "-f",
 #     "--field",
 #     "fields",
+#     autocompletion=__fields_autocomplete,
 #     help="Field to add to output - specify once for each field",
+#     multiple=True,
+#     required=False,
 #     short_help="Field names",
 #     type=click.STRING,
-#     required=False,
-#     multiple=True,
-#     autocompletion=__fields_autocomplete,
 # )
 @click.option(
     "--http2",
     "http2",
     default=True,
     help="Enable HTTP2 support for querying API",
+    is_flag=True,
     show_default=True,
     type=bool,
-    is_flag=True,
 )
 @click.argument(
     "ips",
+    metavar="IP",
     nargs=-1,
     required=True,
     type=IPAddressParam(),
-    metavar="IP",
 )
 @click.option(
     "-k",
     "--key",
     "key",
     help="The optional API key for 2ip.me",
-    type=str,
     required=False,
+    type=str,
 )
 @click.option(
     "-l",
@@ -84,9 +86,9 @@ SAMPLE_IP = IPv4Address("192.0.2.0")
     default="geo",
     help="The lookup provider/type (geo for geographic information or " \
         "provider for provider information)",
+    is_eager=True,
     show_default=True,
     type=click.Choice(["geo", "provider"], case_sensitive=False),
-    is_eager=True,
 )
 @click.option(
     "-o",
@@ -105,9 +107,9 @@ SAMPLE_IP = IPv4Address("192.0.2.0")
     default=False,
     help="Strict mode - any errors will return an exception and exit with " \
         "non-0 exit code",
+    is_flag=True,
     show_default=True,
     type=bool,
-    is_flag=True,
 )
 @click.option(
     "-v",
