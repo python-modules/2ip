@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
-from codecs import open
+from codecs import open as codecs_open
 from setuptools import find_packages, setup
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -13,13 +13,13 @@ if sys.argv[-1] == "publish":
     sys.exit()
 
 about = {}
-with open(os.path.join(here, "twoip", "__version__.py"), "r", "utf-8") as f:
+with codecs_open(os.path.join(here, "twoip", "__version__.py"), "r", "utf-8") as f:
     exec(f.read(), about)
 
-with open("README.md", "r", "utf-8") as f:
+with codecs_open("README.md", "r", "utf-8") as f:
     readme = f.read()
 
-with open("requirements.txt", "r", "utf-8") as f:
+with codecs_open("requirements.txt", "r", "utf-8") as f:
     requires = f.read().splitlines()
 
 test_requirements = ["pytest", "pytest-html"]
