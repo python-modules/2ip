@@ -11,6 +11,7 @@ import logging
 from sys import exit
 from errno import EINTR
 
+
 class Log(object):
 
     """
@@ -64,7 +65,6 @@ class Log(object):
         ## Logging setup completed
         logging.getLogger("twoip").verbose("Logging initialized")
 
-
     @staticmethod
     def __setup(colorlog: bool) -> None:
         """Initialize colorlog or perform basic config for logging module if
@@ -91,11 +91,7 @@ class Log(object):
 
             ## Script is not running in optimized mode; limit the amount of
             ## information provided
-            log_format = (
-                "{asctime} - "
-                "{levelname:10} - "
-                "{message}"
-            )
+            log_format = "{asctime} - " "{levelname:10} - " "{message}"
 
         ## Set date format
         date_format = "%Y-%m-%d:%H:%M:%S"
@@ -238,6 +234,7 @@ class Log(object):
             stacklevel=stacklevel,
         )
         exit(code)
+
 
 class CustomLogFactory(logging.LogRecord):
     """Custom logging format settings
