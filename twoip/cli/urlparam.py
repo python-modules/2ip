@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
+# pylint: disable=broad-except, invalid-name
+
 """
 Click Parameter Type - URL
 
 This parameter type will ensure the value provided is a valid URL.
 """
 
-from click import ParamType
 from urllib import parse
-
+from click import ParamType
 
 class URLParam(ParamType):
     """Validate the parameter is a valid URL
@@ -20,7 +21,7 @@ class URLParam(ParamType):
 
     name = "URL"
 
-    def convert(self, value: str, param, context) -> str:
+    def convert(self, value: str, param, ctx) -> str:
         """The function which will perform validation or normalization
 
         Arguments:
@@ -37,18 +38,21 @@ class URLParam(ParamType):
             self.fail(
                 f'Exception validating "{value!r}" as a valid URL: {e}',
                 param,
-                context,
+                ctx,
             )
 
         ## Make sure the URL is formed correctly
-        if all([url.scheme, url.netloc]):
+        if not all([url.scheme, url.netloc]):
             if url.path:
-                return f"{url.scheme}://{url.netloc}{url.path}"
+                formatted_url = f"{url.scheme}://{url.netloc}{url.path}"
             else:
-                return f"{url.scheme}://{url.netloc}"
+                formatted_url = f"{url.scheme}://{url.netloc}"
         else:
             self.fail(
                 f'URL "{value!r}" is not correctly formed',
                 param,
-                context,
+                ctx,
             )
+
+        ## Return formatted url
+        return formatted_url

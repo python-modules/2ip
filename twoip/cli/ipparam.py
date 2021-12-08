@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 
+# pylint: disable=broad-except, invalid-name
+
 """
 Click Parameter Type - IP Address
 
-This parameter type will ensure the value provided is an IP address and convert it into the relevant IPv4Address or IPv6Address object.
+This parameter type will ensure the value provided is an IP address and convert
+it into the relevant IPv4Address or IPv6Address object.
 """
 
-from click import ParamType
 from ipaddress import ip_address, IPv4Address, IPv6Address
 from typing import Union
-
+from click import ParamType
 
 class IPAddressParam(ParamType):
-    """Validate the parameter is an IPv4/IPv6 address and normalize into an IPv4Address or IPv6Address object.
+    """Validate the parameter is an IPv4/IPv6 address and normalize into an
+    IPv4Address or IPv6Address object.
 
     Examples:
         '192.0.2.0' will become IPv4Address('192.0.2.0')
@@ -21,7 +24,7 @@ class IPAddressParam(ParamType):
 
     name = "IP Address"
 
-    def convert(self, value: str, param, context) -> Union[IPv4Address, IPv6Address]:
+    def convert(self, value: str, param, ctx) -> Union[IPv4Address, IPv6Address]:
         """The function which will perform validation or normalization
 
         Arguments:
@@ -43,7 +46,8 @@ class IPAddressParam(ParamType):
             self.fail(
                 f'Exception validating "{value!r}" as a valid IPv4 or IPv6 IP address: {e}',
                 param,
-                context,
+                ctx,
             )
-        else:
-            return address
+
+        ## Return validated address object
+        return address
