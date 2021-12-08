@@ -13,7 +13,8 @@ import logging
 from sys import exit as sys_exit
 from errno import EINTR
 
-class Log():
+
+class Log:
 
     """
     Logging Module
@@ -92,11 +93,8 @@ class Log():
 
             ## Script is not running in optimized mode; limit the amount of
             ## information provided
-            log_format = (
-                "{asctime} - "
-                "{levelname:10} - "
-                "{message}"
-            )
+            ## pylint: disable=implicit-str-concat
+            log_format = "{asctime} - " "{levelname:10} - " "{message}"
 
         ## Set date format
         date_format = "%Y-%m-%d:%H:%M:%S"
@@ -223,7 +221,9 @@ class Log():
             )
 
     @staticmethod
-    def __log_fatal(*args, message: str, stacklevel: int = 3, code: int = def_code, **kwargs) -> None:
+    def __log_fatal(
+        *args, message: str, stacklevel: int = 3, code: int = def_code, **kwargs
+    ) -> None:
         """Log a message at the critical level and exit
 
         Args:
