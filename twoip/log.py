@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# pylint: disable=too-few-public-methods
+
 """
 TwoIP API Client - Logging
 
@@ -8,11 +10,10 @@ This file provides the logging functionality for the TwoIP API Client.
 
 import logging
 
-from sys import exit
+from sys import exit as sys_exit
 from errno import EINTR
 
-
-class Log(object):
+class Log():
 
     """
     Logging Module
@@ -91,13 +92,18 @@ class Log(object):
 
             ## Script is not running in optimized mode; limit the amount of
             ## information provided
-            log_format = "{asctime} - " "{levelname:10} - " "{message}"
+            log_format = (
+                "{asctime} - "
+                "{levelname:10} - "
+                "{message}"
+            )
 
         ## Set date format
         date_format = "%Y-%m-%d:%H:%M:%S"
 
         ## Check if colorlog should be used
         ## Only attempt to load if not running in optimized mode
+        ## pylint: disable=broad-except, import-outside-toplevel
         if colorlog:
             try:
                 from colorlog import ColoredFormatter
@@ -171,14 +177,15 @@ class Log(object):
         ## Get the logger
         logger = logging.getLogger()
 
-        ## Get the log level that should be used. If the log level is out of range (ie. above 6) the level will default to logging.TRACE
+        ## Get the log level that should be used. If the log level is out of
+        ## range (ie. above 6) the level will default to logging.TRACE
         level = levels.get(verbosity, logging.TRACE)
 
         ## Set the log level
         logger.setLevel(level)
 
     @staticmethod
-    def __log_trace(message: str, stacklevel: int = 3, *args, **kwargs) -> None:
+    def __log_trace(message: str, *args, stacklevel: int = 3, **kwargs) -> None:
         """Log a message at the trace level
 
         Logging is only allowed if the code is not running in optimized mode.
@@ -190,7 +197,7 @@ class Log(object):
             logging.log(logging.TRACE, message, stacklevel=stacklevel, *args, **kwargs)
 
     @staticmethod
-    def __log_debug(message: str, stacklevel: int = 3, *args, **kwargs) -> None:
+    def __log_debug(message: str, *args, stacklevel: int = 3, **kwargs) -> None:
         """Log a message at the debug level
 
         Logging is only allowed if the code is not running in optimized mode.
@@ -202,7 +209,7 @@ class Log(object):
             logging.log(logging.DEBUG, message, stacklevel=stacklevel, *args, **kwargs)
 
     @staticmethod
-    def __log_verbose(message, stacklevel: int = 3, *args, **kwargs) -> None:
+    def __log_verbose(message: str, *args, stacklevel: int = 3, **kwargs) -> None:
         """Log a message at the verbose level
 
         Logging is only allowed if the code is not running in optimized mode.
@@ -216,9 +223,7 @@ class Log(object):
             )
 
     @staticmethod
-    def __log_fatal(
-        message, stacklevel: int = 3, code: int = def_code, *args, **kwargs
-    ) -> None:
+    def __log_fatal(*args, message: str, stacklevel: int = 3, code: int = def_code, **kwargs) -> None:
         """Log a message at the critical level and exit
 
         Args:
@@ -227,13 +232,14 @@ class Log(object):
         """
         logging.critical(message, stacklevel=stacklevel, *args, **kwargs)
         ## Log stack info
+        ## pylint: disable=logging-fstring-interpolation
         logging.log(
             logging.DEBUG,
             f"Exiting with error code {code} due to fatal error",
             stack_info=True,
             stacklevel=stacklevel,
         )
-        exit(code)
+        sys_exit(code)
 
 
 class CustomLogFactory(logging.LogRecord):
