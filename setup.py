@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+
+# pylint: disable=exec-used
+
+"""
+TwoIP setup script
+"""
+
 import os
 import sys
 from codecs import open as codecs_open
