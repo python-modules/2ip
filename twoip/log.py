@@ -13,6 +13,7 @@ import logging
 from sys import exit as sys_exit
 from errno import EINTR
 
+from twoip.__config__ import __logger__
 
 class Log:
 
@@ -65,7 +66,7 @@ class Log:
         self.__set_log_level(verbosity=verbosity)
 
         ## Logging setup completed
-        logging.getLogger("twoip").verbose("Logging initialized")
+        logging.getLogger(__logger__).verbose("Logging initialized")
 
     @staticmethod
     def __setup(colorlog: bool) -> None:
@@ -148,12 +149,12 @@ class Log:
         logging.addLevelName(logging.VERBOSE, "VERBOSE")
 
         ## Set the handlers that will be used to log events at the new levels
-        setattr(logging.getLogger("twoip"), "fatal", self.__log_fatal)
-        setattr(logging.getLogger("twoip"), "trace", self.__log_trace)
-        setattr(logging.getLogger("twoip"), "verbose", self.__log_verbose)
+        setattr(logging.getLogger(__logger__), "fatal", self.__log_fatal)
+        setattr(logging.getLogger(__logger__), "trace", self.__log_trace)
+        setattr(logging.getLogger(__logger__), "verbose", self.__log_verbose)
 
         ## Overwrite the handler for debug level events so that logging can be a noop if not needed
-        setattr(logging.getLogger("twoip"), "debug", self.__log_debug)
+        setattr(logging.getLogger(__logger__), "debug", self.__log_debug)
 
     def level(self, verbosity: int) -> None:
         """Set the log level"""
