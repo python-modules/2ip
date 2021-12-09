@@ -15,7 +15,7 @@ import logging
 import click
 
 from twoip.__version__ import __version__
-from twoip.__config__ import __api__
+from twoip.__config__ import __api__, __logger__
 from twoip.log import Log
 from twoip.parameters import IPAddressParam, URLParam
 
@@ -140,7 +140,7 @@ def cli(
 
     ## Create logger
     Log(verbosity=verbosity)
-    log = logging.getLogger("twoip")
+    log = logging.getLogger(__logger__)
 
 if __name__ == "__main__":
     cli(auto_envvar_prefix="2IP")
