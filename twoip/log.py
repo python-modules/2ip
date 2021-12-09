@@ -39,7 +39,7 @@ class Log:
     ## Set default error code for fatal errors
     def_code: int = EINTR
 
-    def __init__(self, verbosity: int = def_verbosity) -> object:
+    def __init__(self, verbosity: int = def_verbosity) -> None:
         """Initialize logging
 
         Args:
@@ -49,7 +49,6 @@ class Log:
         Returns:
             object: logging object
         """
-
         ## Check if running in optimized mode; if not colorlog may be used
         if __debug__:
             colorlog: bool = True
@@ -223,7 +222,7 @@ class Log:
 
     @staticmethod
     def __log_fatal(
-        *args, message: str, stacklevel: int = 3, code: int = def_code, **kwargs
+        message: str, *args, stacklevel: int = 3, code: int = def_code, **kwargs
     ) -> None:
         """Log a message at the critical level and exit
 
@@ -231,7 +230,7 @@ class Log:
             message (str): The message to log
             code (int): The exit code to use. Defaults to errno.EINTR.
         """
-        logging.critical(message, stacklevel=stacklevel, *args, **kwargs)
+        logging.exception(message, stacklevel=stacklevel, *args, **kwargs)
         ## Log stack info
         ## pylint: disable=logging-fstring-interpolation
         logging.log(
