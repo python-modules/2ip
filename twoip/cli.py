@@ -16,8 +16,8 @@ import click
 
 from twoip.__version__ import __version__
 from twoip.__config__ import __api__, __logger__
-from twoip.log import Log
 from twoip.parameters import IPAddressParam, URLParam
+from twoip.client import Client
 
 # Generate sample GeoResult and ProviderResult (used for retrieving available fields
 SAMPLE_IP = IPv4Address("192.0.2.0")
@@ -137,10 +137,14 @@ def cli(
     This will execute the API query and output the results in the format
     requested.
     """
+    ## Create TwoIP API client
+    client = Client(api=api, connections=connections, http2=http2, key=key, strict=strict, verbosity=verbosity)
 
-    ## Create logger
-    Log(verbosity=verbosity)
+    ## Get logger
     log = logging.getLogger(__logger__)
+
+    ## Perform lookup
+    client.lookup(ips, lookup=lookup)
 
 if __name__ == "__main__":
     cli(auto_envvar_prefix="2IP")
