@@ -13,9 +13,9 @@ import pprint
 from ipaddress import IPv4Address, IPv6Address, ip_address
 from typing import Optional, Union, Literal
 
-from twoip.__version__ import __version__
 from twoip.__config__ import __api__, __logger__
 from twoip.log import Log
+from twoip.http import HTTP
 
 class Client:
 
@@ -63,9 +63,6 @@ class Client:
         self._key = key
         self._strict = strict
 
-        ## Create HTTP user agent for requests
-        self._agent = f'TwoIP Python API/{__version__}'
-
         ## Log
         self.log.debug("TwoIP API Client initialized")
         self.log.debug("Configuration:")
@@ -74,7 +71,6 @@ class Client:
         self.log.debug(f"    HTTP2: {self._http2}")
         self.log.debug(f"    API Key: {self._key}")
         self.log.debug(f"    Strict: {self._strict}")
-        self.log.debug(f"    User Agent: {self._agent}")
 
         ## Warn if not using API key
         if not key:
