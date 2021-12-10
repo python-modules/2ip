@@ -12,8 +12,9 @@ import pprint
 
 from ipaddress import IPv4Address, IPv6Address, ip_address
 from typing import Optional, Union, Literal
+from urllib.parse import urlparse, urlunparse
 
-from twoip.__config__ import __api__, __logger__
+from twoip.__config__ import __api__, __logger__, __uri_geo__, __uri_provider__
 from twoip.log import Log
 from twoip.http import HTTP
 
@@ -91,7 +92,6 @@ class Client:
         lookup: Literal["geo", "provider"] = "geo",
     ) -> object:
         """Perform the lookup against the 2IP API"""
-        self.log.debug(f"2IP API Client - Lookup request type {lookup}")
         ## Make sure either an IP or a list/tuple of IPs is provided
         if not ip and not ips:
             self.log.fatal("An IP or a list/tuple of IPs must be provided to lookup")
@@ -115,6 +115,11 @@ class Client:
             )
             self.log.trace(f"IPs:\n{pprint.pformat(ips)}")
 
+        ## Generate lookup URL
+        self.log.trace("Generating lookup URL")
+        url = self.__generate_url(api = self._api, lookup = lookup)
+        self.log.debug(f"Lookup URL for request set to: {url}")
+
     @staticmethod
     def __normalize_ips(
         ips: Union[
@@ -123,7 +128,6 @@ class Client:
         ]
     ) -> list[Union[IPv4Address, IPv6Address]]:
         """Normalize IPs"""
-
         ## Convert to list from the current format and deduplicate
         if isinstance(ips, tuple):
             ips = list(
@@ -154,3 +158,28 @@ class Client:
 
         ## Return IP's
         return ips
+
+    @staticmethod
+    def __generate_url(api: str, lookup: Literal["geo", "provider"]) -> str:
+        """Generate the lookup URL based on the lookup type requested"""
+        ## Ensure lookup type is valid
+        if lookup not in ["geo", "provider"]:
+            raise ValueError(f"Lookup type must be either 'geo' or 'provider' ({lookup} is invalid)")
+
+        ## Parse API URL
+        try:
+            parts = list(urlparse(api))
+        except Exception as e:
+            raise ValueError(f'API URL could not be generated:\n{e}')
+
+        ## Add URI
+        if lookup == "geo":
+            parts[2] = __uri_geo__
+        elif lookup == "provider":
+            parts[2] = __uri_provider__
+
+        ## Generate the full URL
+        url = urlunparse(parts)
+
+        ## Return
+        return url
