@@ -17,6 +17,7 @@ from twoip.__config__ import __api__, __logger__
 from twoip.log import Log
 from twoip.http import HTTP
 
+
 class Client:
 
     """
@@ -41,17 +42,21 @@ class Client:
             object: The TwoIP API client object
         """
         ## Set up logging
-        Log(verbosity = verbosity)
+        Log(verbosity=verbosity)
         self.log = logging.getLogger(__logger__)
 
         ## Don't allow more than 100 connections
         if connections < 1 or connections > 100:
-            self.log.error(f'A minimum of 1 connection and a maximum of 100 ' \
-                'connections must be used ({connections} is out of range)')
+            self.log.error(
+                f"A minimum of 1 connection and a maximum of 100 "
+                "connections must be used ({connections} is out of range)"
+            )
             ## If running in strict mode, raise an exception
             if strict:
-                raise ValueError(f'A minimum of 1 connection and a maximum ' \
-                    'of 100 connections must be used')
+                raise ValueError(
+                    f"A minimum of 1 connection and a maximum "
+                    "of 100 connections must be used"
+                )
             ## Otherwise, lower number of connections to expected value
             else:
                 connections = 100
@@ -79,11 +84,14 @@ class Client:
     def lookup(
         self,
         ip: Union[str, IPv4Address, IPv6Address] = None,
-        ips: Union[tuple[Union[str, IPv4Address, IPv6Address]], list[Union[str, IPv4Address, IPv6Address]]] = None,
+        ips: Union[
+            tuple[Union[str, IPv4Address, IPv6Address]],
+            list[Union[str, IPv4Address, IPv6Address]],
+        ] = None,
         lookup: Literal["geo", "provider"] = "geo",
     ) -> object:
-        """Perform the lookup against the 2IP API
-        """
+        """Perform the lookup against the 2IP API"""
+        self.log.debug(f"2IP API Client - Lookup request type {lookup}")
         ## Make sure either an IP or a list/tuple of IPs is provided
         if not ip and not ips:
             self.log.fatal("An IP or a list/tuple of IPs must be provided to lookup")
@@ -102,25 +110,47 @@ class Client:
 
         ## Log debugging info but avoid if running in optimized mode as this could be expensive
         if __debug__:
-            self.log.debug(f"Request to lookup {len(ips)} IPs with the {lookup} provider")
+            self.log.debug(
+                f"Request to lookup {len(ips)} IPs with the {lookup} provider"
+            )
             self.log.trace(f"IPs:\n{pprint.pformat(ips)}")
 
     @staticmethod
-    def __normalize_ips(ips: Union[tuple[Union[str, IPv4Address, IPv6Address]], list[Union[str, IPv4Address, IPv6Address], str, IPv4Address, IPv6Address]]) -> list[Union[IPv4Address, IPv6Address]]:
-        """Normalize IPs
-        """
+    def __normalize_ips(
+        ips: Union[
+            tuple[Union[str, IPv4Address, IPv6Address]],
+            list[Union[str, IPv4Address, IPv6Address], str, IPv4Address, IPv6Address],
+        ]
+    ) -> list[Union[IPv4Address, IPv6Address]]:
+        """Normalize IPs"""
 
         ## Convert to list from the current format and deduplicate
         if isinstance(ips, tuple):
-            ips = list(dict.fromkeys([f'{ip_address(ip)}' if isinstance(ip, str) else f'{ip}' for ip in list(ips)]))
+            ips = list(
+                dict.fromkeys(
+                    [
+                        f"{ip_address(ip)}" if isinstance(ip, str) else f"{ip}"
+                        for ip in list(ips)
+                    ]
+                )
+            )
         elif isinstance(ips, list):
-            ips = list(dict.fromkeys([f'{ip_address(ip)}' if isinstance(ip, str) else f'{ip}' for ip in ips]))
+            ips = list(
+                dict.fromkeys(
+                    [
+                        f"{ip_address(ip)}" if isinstance(ip, str) else f"{ip}"
+                        for ip in ips
+                    ]
+                )
+            )
         elif isinstance(ips, str):
-            ips = [f'{ip_address(ips)}']
+            ips = [f"{ip_address(ips)}"]
         elif isinstance(ips, IPv4Address) or isinstance(ips, IPv6Address):
-            ips = [f'{ips}']
+            ips = [f"{ips}"]
         else:
-            raise ValueError("IPs must be provided as a list/tuple of IPs, a string, or an IPv4Address/IPv6Address object")
+            raise ValueError(
+                "IPs must be provided as a list/tuple of IPs, a string, or an IPv4Address/IPv6Address object"
+            )
 
         ## Return IP's
         return ips
