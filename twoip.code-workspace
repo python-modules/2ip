@@ -20,7 +20,8 @@
 			"pformat",
 			"pydantic",
 			"Roadmap",
-			"tablefmt"
+			"tablefmt",
+			"twoip"
 		],
 		"gitlens.remotes": [
 			{ "domain": "git.remote.sx", "type": "GitLab" }
