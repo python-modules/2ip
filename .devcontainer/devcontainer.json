@@ -1,0 +1,130 @@
+// For format details, see https://aka.ms/vscode-remote/devcontainer.json or the definition README at
+// https://github.com/microsoft/vscode-dev-containers/tree/master/containers/alpine-3.10-git
+{
+  "name": "2IP API Client Development Environment",
+
+  // Install python requirements:
+  "onCreateCommand": ["/usr/local/scripts/create.sh"],
+
+  // Load the docker-compose file to bring the services up
+  "dockerComposeFile": [
+    // Main compose file
+    "docker-compose.yaml"
+  ],
+
+  // Use the VS Code container
+  "service": "code",
+
+  // List of containers to run
+  "runServices": ["code"],
+
+  // Update shutdown action as vs code does not appear to be stopping contains otherwise
+  "shutdownAction": "stopCompose",
+
+  // Set workspace to /code
+  "workspaceFolder": "/code",
+
+  // Customizations for this environment
+  "customizations": {
+    "vscode": {
+      // Define settings
+      "settings": {
+        // Create terminal profiles
+        "terminal.integrated.profiles.linux": {
+          "zsh": {
+            "path": "zsh"
+          },
+          "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+          },
+          "tmux": {
+            "path": "tmux",
+            "icon": "terminal-tmux"
+          }
+        },
+
+        // Set default profile as ZSH
+        "terminal.integrated.defaultProfile": "zsh"
+      },
+
+      // Install dev container extensions
+      "extensions": [
+        // Better Comments
+        "aaron-bond.better-comments",
+        // Bookmarks
+        "alefragnani.bookmarks",
+        // Code Runner
+        "formulahendry.code-runner",
+        // Code Spell
+        "streetsidesoftware.code-spell-checker",
+        // Docker
+        "ms-azuretools.vscode-docker",
+        // GitLens
+        "eamodio.gitlens",
+        // GitLab Workflow
+        "gitlab.gitlab-workflow",
+        // GitHub Co Pilot
+        "GitHub.copilot",
+        // Jupyter
+        "ms-toolsai.jupyter",
+        // Markdown All in One
+        "yzhang.markdown-all-in-one",
+        // Markdown Preview Enhanced
+        "shd101wyy.markdown-preview-enhanced",
+        // Markdown TOC
+        "alanwalk.markdown-toc",
+        // markdownlint
+        "davidanson.vscode-markdownlint",
+        // Microsoft Intellicode
+        "visualstudioexptteam.vscodeintellicode",
+        // Magic Python
+        "magicstack.magicpython",
+        // Prettier code formatter
+        "esbenp.prettier-vscode",
+        // Python
+        "ms-python.python",
+        // Python autodocstring
+        "njpwerner.autodocstring",
+        // Python environments
+        "donjayamanne.python-environment-manager",
+        // Python MyPy
+        "matangover.mypy",
+        // Python Pylance
+        "ms-python.vscode-pylance",
+        // Python PyLint
+        "ms-python.pylint",
+        // Python isort
+        "ms-python.isort",
+        // Python flake8
+        "ms-python.flake8",
+        // Rainbow CSV
+        "mechatroner.rainbow-csv",
+        // REST API Client
+        "humao.rest-client",
+        // Shellcheck
+        "timonwong.shellcheck",
+        // Shell format
+        "foxundermoon.shell-format",
+        // Sonarlint
+        "sonarsource.sonarlint-vscode",
+        // Table Formatter
+        "shuworks.vscode-table-formatter",
+        // Thunder Client for sending HTTP requests
+        "rangav.vscode-thunder-client",
+        // Todo Tree
+        "gruntfuggly.todo-tree",
+        // TOML
+        "be5invis.toml",
+        // Trailing spaces
+        "shardulm94.trailing-spaces",
+        // VSC Jupyter Notebook Previewer
+        "jithurjacob.nbpreviewer",
+        // VSC Python Indent
+        "kevinrose.vsc-python-indent",
+        // YAML
+        "redhat.vscode-yaml"
+      ]
+    }
+  }
+}

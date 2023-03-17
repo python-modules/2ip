@@ -1,3 +1,8 @@
+# Byte-compiled / optimized / DLL files for python
+__pycache__/
+*.py[cod]
+*$py.class
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -105,13 +110,13 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
+.env
 
 # Spyder project settings
 .spyderproject
@@ -136,3 +141,36 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Static files
+/bgpflow/staticfiles/
+
+## Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+## JetBrains - User specifics
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+## JetBrains - Generated files
+.idea/**/contentModel.xml
+
+## JetBrains - Sensitive or high-churn files
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
+
+## JetBrains - Gradle
+.idea/**/gradle.xml
+.idea/**/libraries
+
+## Pytest report files
+pytest-report.html

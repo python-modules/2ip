@@ -1,0 +1,52 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"python.formatting.provider": "black",
+		"editor.tabSize": 4,
+		"cSpell.words": [
+			"dataclassy",
+			"datefmt",
+			"httpx",
+			"Inet",
+			"ipaddress",
+			"levelname",
+			"levelno",
+			"loguru",
+			"nbytes",
+			"pformat",
+			"pydantic",
+			"Roadmap",
+			"tablefmt"
+		],
+		"gitlens.remotes": [
+			{ "domain": "git.remote.sx", "type": "GitLab" }
+		],
+		"gitlab.showPipelineUpdateNotifications": true,
+		"gitlab.pipelineGitRemoteName": "origin",
+		"python.defaultInterpreterPath": "/home/vscode/conda/envs/2ip/bin/python3",
+		"python.terminal.activateEnvironment": false,
+		"thunder-client.httpVersion": "HTTP/2",
+		"pylint.args": [
+			"--max-line-length=120"
+		],
+		"flake8.args": [
+			"--max-line-length=120"
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Python (Default): Current File",
+				"type": "python",
+				"request": "launch",
+				"program": "${file}",
+				"console": "integratedTerminal"
+			}
+		]
+	}
+}
