@@ -50,3 +50,12 @@ class APIResponseCodeError(_APIException):
 
     def __str__(self):
         return f"API response code was not 2xx: {self.response.status_code}"
+
+
+class APIQuotaExceeded(_APIException):
+    """
+    Exception raised when exceeding the API lookup quota
+    """
+
+    def __str__(self):
+        return "API lookup quota exceeded. Please check https://2ip.me/en/api/our-api for information on API limits."
