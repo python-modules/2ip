@@ -7,7 +7,7 @@ Command line interface for interacting with the 2IP API.
 """
 
 from sys import stderr
-from typing import Optional
+from typing import Optional, Tuple
 
 import click
 from loguru import logger
@@ -24,6 +24,7 @@ from loguru._defaults import (
 from twoip.__version__ import __version__
 from twoip.client import Client
 from twoip.validators.url import URL
+from twoip.methods import Provider
 
 
 # Get command line arguments/options
@@ -38,7 +39,7 @@ from twoip.validators.url import URL
     "key",
     envvar="API_KEY",
     help="The API key to use for authentication",
-    required=True,
+    required=False,
     type=str,
 )
 @click.option(
@@ -69,8 +70,8 @@ from twoip.validators.url import URL
 @click.pass_context
 def cli(
     ctx,
-    key: str,
     timeout: int,
+    key: Optional[str] = None,
     url: Optional[str] = None,
     verbosity: int = 1,
 ) -> None:
@@ -116,8 +117,29 @@ def cli(
         timeout=timeout,
     )
 
-    # Pass the reseller client to the context
+    # Pass the lookup client to the context
     ctx.obj["client"] = client
+
+
+@cli.command()
+@click.argument(
+    "addresses",
+    nargs=-1,
+    required=True,
+    type=str,
+)
+@click.pass_context
+def provider(ctx, addresses: Tuple[str]):
+    """
+    Perform a provider lookup for one or more IP addresses
+    """
+    # Get Provider lookup client
+    provider_m: Provider = ctx.obj["client"].provider()
+
+    # Run lookup
+    result = provider_m.lookup(addresses=list(dict.fromkeys(addresses)))
+
+    print(result.to_table())
 
 
 if __name__ == "__main__":
