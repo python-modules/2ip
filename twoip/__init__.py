@@ -5,3 +5,5 @@
 
 Module init
 """
+
+from twoip.client import Client
