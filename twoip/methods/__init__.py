@@ -8,4 +8,4 @@ Import the various methods to query the 2IP API
 
 # flake8: noqa
 
-from .geo import Geo
+from .provider import Provider
