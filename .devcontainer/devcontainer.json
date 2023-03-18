@@ -68,6 +68,8 @@
         "GitHub.copilot",
         // Jupyter
         "ms-toolsai.jupyter",
+        // JSON Crack
+        "AykutSarac.jsoncrack-vscode",
         // Markdown All in One
         "yzhang.markdown-all-in-one",
         // Markdown Preview Enhanced
