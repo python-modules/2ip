@@ -11,7 +11,7 @@ from typing import Optional
 from loguru import logger
 
 from twoip.http import HTTP
-from twoip.methods import Geo
+from twoip.methods import Provider
 from twoip.dataclasses.settings import Settings
 
 
@@ -22,7 +22,7 @@ class Client:
 
     def __init__(
         self,
-        key: str,
+        key: Optional[str] = None,
         url: Optional[str] = None,
         timeout: int = 30,
         user_agent: Optional[str] = None,
@@ -46,8 +46,8 @@ class Client:
         # Create the HTTP client that will be used to send requests
         self.http = HTTP(settings=self.settings)
 
-    def geo(self) -> object:
+    def provider(self) -> object:
         """
         Return the 2IP Geo IP API client
         """
-        return Geo(http=self.http)
+        return Provider(http=self.http)
