@@ -3,7 +3,7 @@
 """
 2IP API Client
 
-Geographic Lookup API Client
+Provider Lookup API Client
 """
 
 from concurrent.futures import ThreadPoolExecutor
@@ -104,7 +104,9 @@ class Provider:
             response["asn"] = response.pop("as")
 
         # Parse the response and return
-        logger.trace(f"Parsing response for IP '{address}' into a ProviderResult object")
+        logger.trace(
+            f"Parsing response for IP '{address}' into a ProviderResult object"
+        )
         return ProviderResult(ipaddress=address, **response)
 
     def lookup(
