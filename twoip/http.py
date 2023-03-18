@@ -16,6 +16,7 @@ from twoip.exceptions.api import (
     APIContentTypeError,
     APIResponseCodeError,
     APIParserError,
+    APIQuotaExceeded,
 )
 from twoip.dataclasses.settings import Settings
 
@@ -50,9 +51,17 @@ class HTTP:
             "User-Agent": settings.user_agent,
         }
 
+        # Set API key parameter if defined to use for all requests
+        self._params: dict[str, str] | None = None
+        if self.settings.key:
+            self._params = {
+                "key": self.settings.key,
+            }
+
         # Create the httpx client object
         self.client = httpx.Client(
             headers=self._headers,
+            params=self._params,
             http2=self.settings.http2,
             base_url=self.settings.url,
             timeout=self.settings.timeout,
@@ -64,8 +73,14 @@ class HTTP:
         """
         Check the response code from the API and raise an exception if the code is not 200
         """
-        # Raise exception if response code is invalid
         logger.debug("Checking HTTP response code")
+
+        # Check if rate limit exceeded
+        if response.status_code == 429:
+            logger.critical("HTTP response code indicates rate limit exceeded")
+            raise APIQuotaExceeded(response=response)
+
+        # Raise exception if response code is invalid
         try:
             response.raise_for_status()
             logger.debug(f"HTTP response code {response.status_code} indicates success")
