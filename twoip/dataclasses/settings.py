@@ -62,6 +62,16 @@ class Settings:
         le=120,
     )
 
+    threads: int = Field(
+        title="Threads",
+        description="The number of threads to use when making HTTP requests 2IP API",
+        default=25,
+        show_default=True,
+        env="THREADS",
+        ge=1,
+        le=50,
+    )
+
     @root_validator(pre=True)
     def user_agent_set(cls, values: dict) -> dict:  # pylint: disable=no-self-argument
         """
