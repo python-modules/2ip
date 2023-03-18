@@ -79,8 +79,8 @@ vscode = [
   "types-tabulate",
 ]
 
-#[tool.poetry.scripts]
-#2ip = 'twoip.cli:cli'
+[tool.poetry.scripts]
+twoip = 'twoip.cli:cli'
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
