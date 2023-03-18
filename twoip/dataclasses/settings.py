@@ -30,20 +30,18 @@ class Settings:
         description="The user agent that will be sent to the 2IP API when making requests",
     )
 
+    url: HttpUrl = Field(
+        title="API Base URL",
+        description="The base API URL to use when making requests to the 2IP API",
+        env="API_URL",
+    )
+
     key: str | None = Field(
         title="API Key",
         description="The API key used to authenticate with the 2IP API",
         default=None,
         show_default=True,
         env="API_KEY",
-    )
-
-    url: HttpUrl = Field(
-        title="API Base URL",
-        description="The base API URL to use when making requests to the 2IP API",
-        default=APISettings.API_URL.value,
-        show_default=True,
-        env="API_URL",
     )
 
     http2: bool = Field(
@@ -73,6 +71,19 @@ class Settings:
         if values["user_agent"] is None:
             # User agent not defined; set default
             values["user_agent"] = f"2IP Python API Client v{__version__}"
+
+        # Return the correctly set values
+        return values
+
+    @root_validator(pre=True)
+    def url_set(cls, values: dict) -> dict:  # pylint: disable=no-self-argument
+        """
+        Set the default API base URL if not defined
+        """
+        # Check if API URL defined
+        if values["url"] is None:
+            # API URL not defined; set default
+            values["url"] = APISettings.API_URL.value
 
         # Return the correctly set values
         return values
