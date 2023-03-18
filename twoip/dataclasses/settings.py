@@ -25,51 +25,52 @@ class Settings:
     Define and store the run time arguments for the API client
     """
 
-    user_agent: str = Field(
-        title="User Agent",
-        description="The user agent that will be sent to the 2IP API when making requests",
-    )
-
     url: HttpUrl = Field(
         title="API Base URL",
         description="The base API URL to use when making requests to the 2IP API",
-        env="API_URL",
+        env="2IP_URL",
+    )
+
+    threads: int = Field(
+        title="Threads",
+        description="The number of threads to use when making HTTP requests 2IP API",
+        env="2IP_THREADS",
+        ge=1,
+        le=25,
+    )
+
+    http2: bool = Field(
+        title="HTTP/2",
+        description="Enable HTTP/2 support for requests to the 2IP API",
+        env="2IP_HTTP2",
+    )
+
+    timeout: int = Field(
+        title="Timeout",
+        description="The time out in seconds for requests to the 2IP API",
+        env="2IP_TIMEOUT",
+        ge=1,
+        le=120,
+    )
+
+    verbosity: int = Field(
+        title="Verbosity",
+        description="The logging verbosity/level",
+        env="2IP_VERBOSITY",
+        ge=1,
+        le=120,
+    )
+
+    user_agent: str = Field(
+        title="User Agent",
+        description="The user agent that will be sent to the 2IP API when making requests",
     )
 
     key: str | None = Field(
         title="API Key",
         description="The API key used to authenticate with the 2IP API",
         default=None,
-        show_default=True,
-        env="API_KEY",
-    )
-
-    http2: bool = Field(
-        title="HTTP/2",
-        description="Enable HTTP/2 support for requests to the 2IP API",
-        default=True,
-        show_default=True,
-        env="HTTP2",
-    )
-
-    timeout: int = Field(
-        title="Timeout",
-        description="The time out in seconds for requests to the 2IP API",
-        default=30,
-        show_default=True,
-        env="TIMEOUT",
-        ge=1,
-        le=120,
-    )
-
-    threads: int = Field(
-        title="Threads",
-        description="The number of threads to use when making HTTP requests 2IP API",
-        default=25,
-        show_default=True,
-        env="THREADS",
-        ge=1,
-        le=50,
+        env="2IP_KEY",
     )
 
     @root_validator(pre=True)
