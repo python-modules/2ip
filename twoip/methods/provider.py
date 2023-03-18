@@ -6,6 +6,7 @@
 Geographic Lookup API Client
 """
 
+from concurrent.futures import ThreadPoolExecutor
 from ipaddress import ip_address, IPv4Address, IPv6Address
 from functools import lru_cache
 from pprint import pformat
@@ -21,12 +22,15 @@ class Provider:
     2IP API client - Provider Lookup Client
     """
 
-    def __init__(self, http: HTTP):
+    def __init__(self, http: HTTP, threads: int):
         """
         Set up the Provider API client
         """
         # Define HTTP client
         self.http = http
+
+        # Define the number of threads to use for lookups
+        self._threads = threads
 
         # Set the API endpoint
         self._endpoint = "/provider.json"
@@ -100,7 +104,7 @@ class Provider:
             response["asn"] = response.pop("as")
 
         # Parse the response and return
-        logger.trace("Parsing response into a ProviderResult object")
+        logger.trace(f"Parsing response for IP '{address}' into a ProviderResult object")
         return ProviderResult(ipaddress=address, **response)
 
     def lookup(
@@ -123,16 +127,12 @@ class Provider:
         # Convert the addresses to a list of IP address objects
         ips = self.__to_ip_list(addresses)
 
-        # Create list to store the results
-        results: list[ProviderResult] = []
-
         # Loop through each IP address and perform a lookup
-        for address in ips:
-            # Send the lookup to the API (if not cached) and add to results
-            results.append(self.__lookup(address))
+        with ThreadPoolExecutor(max_workers=self._threads) as executor:
+            results = executor.map(self.__lookup, ips)
 
         # Create a ProviderResults object to return
-        provider_results = ProviderResults(results=results)
+        provider_results = ProviderResults(results=list(results))
 
         # Return the lookup results
         logger.info("Provider lookup finished")

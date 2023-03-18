@@ -22,11 +22,12 @@ class Client:
 
     def __init__(
         self,
+        timeout: int = 30,
+        threads: int = 25,
+        http2: bool = True,
         key: Optional[str] = None,
         url: Optional[str] = None,
-        timeout: int = 30,
         user_agent: Optional[str] = None,
-        http2: bool = True,
     ):  # pylint: disable=too-many-arguments
         """
         Set up the new API client
@@ -40,6 +41,7 @@ class Client:
             timeout=timeout,
             user_agent=user_agent,  # type: ignore
             http2=http2,
+            threads=threads,
         )
         logger.trace(f"Loaded settings:\n{self.settings.pretty()}")
 
@@ -48,6 +50,6 @@ class Client:
 
     def provider(self) -> object:
         """
-        Return the 2IP Geo IP API client
+        Return the 2IP Provider IP API client
         """
-        return Provider(http=self.http)
+        return Provider(http=self.http, threads=self.settings.threads)
