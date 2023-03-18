@@ -21,7 +21,8 @@
 			"pydantic",
 			"Roadmap",
 			"tablefmt",
-			"twoip"
+			"twoip",
+			"urllib"
 		],
 		"gitlens.remotes": [
 			{ "domain": "git.remote.sx", "type": "GitLab" }
