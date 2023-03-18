@@ -36,7 +36,8 @@
 		],
 		"flake8.args": [
 			"--max-line-length=120"
-		]
+		],
+		"notebook.output.textLineLimit": 200
 	},
 	"launch": {
 		"version": "0.2.0",
