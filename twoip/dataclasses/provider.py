@@ -30,7 +30,7 @@ class ProviderResult(Base):
     ip: str
 
     # The route of the IP address represented as a string from the Geo lookup
-    route: str
+    route: str | None = None
 
     # The route mask of the IP address represented as an integer from the Geo lookup
     mask: int | None = None
@@ -79,11 +79,8 @@ class ProviderResult(Base):
         if self.asn:
             self.asn = int(self.asn)
 
-        # If no site, set to none
-        if not self.site:
-            self.site = None
-        else:
-            # Convert the site to a URL object
+        # Convert the site to a URL object if defined
+        if self.site:
             try:
                 self.url = urlparse(self.site)
             except Exception:  # pylint: disable=broad-except
